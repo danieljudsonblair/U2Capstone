@@ -20,8 +20,12 @@ public class InvoiceJdbcTemplateImplTests {
     @Autowired
     InvoiceDao dao;
 
+    @Autowired
+    InvoiceItemDao iidao;
+
     @Before
     public void setUp() throws Exception {
+        iidao.getAll().stream().forEach(ii -> iidao.delete(ii.getInvoiceItemId()));
         dao.getAll().stream().forEach(i -> dao.delete(i.getInvoiceId()));
     }
 
