@@ -1,0 +1,301 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: Retail API Service (U2 Capstone)
+  description: Database-backed REST web microservice that enables users to search for and purchase products
+  
+servers: 
+  - url: http://localhost:8181
+    description: Local dev server
+    
+paths:
+  /invoices:
+    post:
+      summary: Create a new invoice object
+      description: Adds a new invoice object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoicePost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+      
+    get:
+      summary: Get all invoices
+      description: Get list of all invoices in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponseList'
+                
+  /invoice/{invoice_id}:
+    get:
+      summary: Get invoice object by id
+      description: Queries for invoice object by id
+      parameters: 
+        - name: invoice_id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /invoices/customer/{customer_id}:
+    get:
+      summary: Get list of invoice objects by customer id
+      description: Queries for invoice objects by customer id
+      parameters: 
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponseList'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        
+  /products/{id}:
+    get:
+      summary: Get product by id
+      description: Queries for product by id
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Product id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /products/inventory:
+    get:
+      summary: Get a list of products currently in inventory
+      description: Get products in inventory
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
+
+  /products/invoice/{invoice_id}:
+    get:
+      summary: Get list of products by invoice id
+      description: Queries for products by invoice id
+      parameters: 
+        - name: invoice_id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /levelup/customer/{customer_id}:
+    get:
+      summary: Get levelup points by customer
+      description: Queries DB for levelup points by customer id
+      parameters:
+      - name: customer_id
+        in: path
+        required: true
+        description: Customer id
+        schema:
+          type: number
+      responses: 
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: number
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+  
+components:
+  schemas:
+
+    ProductResponse:
+      type: object
+      properties:
+        product_id:
+          type: number
+        product_name:
+          type: string
+        product_description:
+          type: string
+        list_price:
+          type: number
+        unit_cost:
+          type: number
+          
+    ProductResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProductResponse'
+          
+    
+    CustomerResponse:
+      type: object
+      properties:
+        customer_id:
+          type: number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          
+    InvoicePost:
+      type: object
+      properties:
+        purchase_date:
+          type: string
+        customer_id:
+          type: number
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePostItem'
+      required:
+      - purchase_date
+      - customer_id
+      - product_list
+      
+    InvoicePostItem:
+      type: object
+      properties:
+        inventory_id:
+          type: number
+        quantity:
+          type: number
+      required:
+      - inventory_id
+      - quantity
+
+    InvoiceResponse:
+      type: object
+      properties:
+        invoice_id:
+          type: number
+        purchase_date:
+          type: string
+        customer_id:
+          type: number
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePostItem'
+            
+    InvoiceResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/InvoiceResponse'
