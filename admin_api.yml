@@ -1,0 +1,921 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: Admin API Service (U2 Capstone)
+  description: Database-backed REST web microservice that enables users (admins) to create/read/update/delete products, customers, invoices, inventory, and level-up data.
+  
+servers: 
+  - url: http://localhost:8282
+    description: Local dev server
+    
+paths:
+  /products:
+    post:
+      summary: Create a new product
+      description: Adds a new product object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductPost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    get:
+      summary: Get all products
+      description: Get list of all products in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
+        
+  /products/{id}:
+    get:
+      summary: Get product by id
+      description: Queries for product by id
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Product id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+    
+    put:
+      summary: Update product by id
+      description: Updates product by id in path with properties (all optional) in request body
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product id
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    delete:
+      summary: Delete product by id
+      description: Deletes product by id in path
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product id
+          schema:
+            type: number
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Unprocessable entity
+          content: 
+            application/json:
+              schema:
+                type: string
+                
+  /products/invoice/{id}:
+    get:
+      summary: Get list of products by invoice id
+      description: Queries for products by invoice id
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /products/inventory:
+    get:
+      summary: Get a list of products currently in inventory
+      description: Get products in inventory
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
+        
+  /customers:
+    post:
+      summary: Create a new customer
+      description: Adds a new customer object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerPost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    get:
+      summary: Get all customers
+      description: Get list of all customers in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponseList'
+                
+  /customers/{customer_id}:
+    get:
+      summary: Get customer by id
+      description: Queries for customer by id
+      parameters: 
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+    
+    put:          
+      summary: Update customer by id
+      description: Updates customer by id in path with properties (all optional) in request body
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdate'
+      responses:
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    delete:
+      summary: Delete customer by id
+      description: Deletes customer by id in path
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: number
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Unprocessable entity
+          content: 
+            application/json:
+              schema:
+                type: string
+                
+  /inventory:
+    post:
+      summary: Create a new inventory object
+      description: Adds a new inventory object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryPost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    get:
+      summary: Get all inventory objects
+      description: Get list of all inventory objects in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponseList'
+                
+  /inventory/{inventory_id}:
+    get:
+      summary: Get inventory object by id
+      description: Queries for inventory object by id
+      parameters: 
+        - name: inventory_id
+          in: path
+          required: true
+          description: Inventory id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+    
+    put:          
+      summary: Update inventory by id
+      description: Updates inventory by id in path with properties (all optional) in request body
+      parameters:
+        - name: inventory_id
+          in: path
+          required: true
+          description: Inventory id
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryUpdate'
+      responses:
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    delete:
+      summary: Delete inventory by id
+      description: Deletes inventory by id in path
+      parameters:
+        - name: inventory_id
+          in: path
+          required: true
+          description: Inventory id
+          schema:
+            type: number
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Unprocessable entity
+          content: 
+            application/json:
+              schema:
+                type: string
+                
+  /levelup:
+    post:
+      summary: Create a new levelup object
+      description: Adds a new levelup object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LevelUpPost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LevelUpResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+      
+    get:
+      summary: Get all levelups
+      description: Get list of all levelups in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LevelUpResponseList'
+                
+  /levelup/{levelup_id}:
+    get:
+      summary: Get levelup object by id
+      description: Queries for levelup object by id
+      parameters: 
+        - name: levelup_id
+          in: path
+          required: true
+          description: Levelup id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LevelUpResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    put:          
+      summary: Update levelup by id
+      description: Updates levelup by id in path with properties (all optional) in request body
+      parameters:
+        - name: levelup_id
+          in: path
+          required: true
+          description: Levelup id
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LevelUpUpdate'
+      responses:
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    delete:
+      summary: Delete levelup by id
+      description: Deletes levelup by id in path
+      parameters:
+        - name: levelup_id
+          in: path
+          required: true
+          description: Levelup id
+          schema:
+            type: number
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Unprocessable entity
+          content: 
+            application/json:
+              schema:
+                type: string  
+                
+  /invoices:
+    post:
+      summary: Create a new invoice object
+      description: Adds a new invoice object to DB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoicePost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+      
+    get:
+      summary: Get all invoices
+      description: Get list of all invoices in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponseList'
+                
+  /invoice/{invoice_id}:
+    get:
+      summary: Get invoice object by id
+      description: Queries for invoice object by id
+      parameters: 
+        - name: invoice_id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    put:          
+      summary: Update invoice by id
+      description: Updates invoice by id in path with properties (all optional) in request body
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceUpdate'
+      responses:
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+    delete:
+      summary: Delete invoice by id
+      description: Deletes invoice by id in path
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: number
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Unprocessable entity
+          content: 
+            application/json:
+              schema:
+                type: string  
+      
+components:
+  schemas:
+
+    ProductPost:
+      type: object
+      properties:
+        product_name:
+          type: string
+        product_description:
+          type: string
+        list_price:
+          type: number
+        unit_cost:
+          type: number
+      required: 
+      - product_name
+      - product_description
+      - list_price
+      - unit_cost
+    
+    ProductUpdate:
+      type: object
+      properties:
+        product_name:
+          type: string
+        product_description:
+          type: string
+        list_price:
+          type: number
+        unit_cost:
+          type: number
+        
+    ProductResponse:
+      type: object
+      properties:
+        product_id:
+          type: number
+        product_name:
+          type: string
+        product_description:
+          type: string
+        list_price:
+          type: number
+        unit_cost:
+          type: number
+          
+    ProductResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProductResponse'
+          
+    CustomerPost:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+      required: 
+      - first_name
+      - last_name
+      - street
+      - city
+      - zip
+      - email
+      - phone
+    
+    CustomerResponse:
+      type: object
+      properties:
+        customer_id:
+          type: number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          
+    CustomerResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/CustomerResponse'
+          
+    CustomerUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          
+    InventoryPost:
+      type: object
+      properties:
+        product_id:
+          type: number
+        quantity:
+          type: number
+      required:
+      - product_id
+      - quantity
+          
+    InventoryResponse:
+      type: object
+      properties:
+        inventory_id:
+          type: number
+        product_id:
+          type: number
+        quantity:
+          type: number
+          
+    InventoryResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/InventoryResponse'
+          
+    InventoryUpdate:
+      type: object
+      properties:
+        product_id:
+          type: number
+        quantity:
+          type: number
+          
+    InvoicePost:
+      type: object
+      properties:
+        purchase_date:
+          type: string
+        customer_id:
+          type: number
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePostItem'
+      required:
+      - purchase_date
+      - customer_id
+      - product_list
+      
+    InvoicePostItem:
+      type: object
+      properties:
+        inventory_id:
+          type: number
+        quantity:
+          type: number
+      required:
+      - inventory_id
+      - quantity
+      
+    InvoiceUpdate:
+      type: object
+      properties:
+        purchase_date:
+          type: string
+        customer_id:
+          type: number
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePostItem'      
+    
+    InvoiceResponse:
+      type: object
+      properties:
+        invoice_id:
+          type: number
+        purchase_date:
+          type: string
+        customer_id:
+          type: number
+        product_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoicePostItem'
+            
+    InvoiceResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/InvoiceResponse'
+          
+    LevelUpPost:
+      type: object
+      properties:
+        customer_id: 
+          type: number
+        points:
+          type: number
+        member_date:
+          type: string
+      required:
+      - customer_id
+      - points
+      - member_date
+       
+    LevelUpResponse:
+      type: object
+      properties:
+        level_up_id:
+          type: number
+        customer_id:
+          type: number
+        points:
+          type: number
+        member_date:
+          type: string
+          
+    LevelUpResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/LevelUpResponse'
+          
+    LevelUpUpdate:
+      type: object
+      properties:
+        customer_id: 
+          type: number
+        points:
+          type: number
+        member_date:
+          type: string
