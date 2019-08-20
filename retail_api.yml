@@ -232,28 +232,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ProductResponse'
-          
-    
-    CustomerResponse:
-      type: object
-      properties:
-        customer_id:
-          type: number
-        first_name:
-          type: string
-        last_name:
-          type: string
-        street:
-          type: string
-        city:
-          type: string
-        zip:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-          
+
     InvoicePost:
       type: object
       properties:
@@ -290,6 +269,20 @@ components:
           type: string
         customer_id:
           type: number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
         product_list:
           type: array
           items:
