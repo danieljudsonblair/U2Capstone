@@ -8,7 +8,13 @@
 		<version>2.1.7.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.company</groupId>
+<!--	<parent>-->
+<!--		<groupId>com.company</groupId>-->
+<!--		<artifactId>U2Capstone</artifactId>-->
+<!--		<version>0.0.1-SNAPSHOT</version>-->
+<!--		<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
+<!--	</parent>-->
+<!--	<groupId>com.company</groupId>-->
 	<artifactId>admin-api-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>admin-api-service</name>
