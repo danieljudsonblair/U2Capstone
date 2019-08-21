@@ -11,12 +11,18 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                dir ("${env.WORKSPACE}/invoice-service"){
+                    sh "pwd"
+                    sh 'mvn -B -DskipTests clean package'
+                }
             }
         }
         stage('Test') {
             steps {
+                dir ("${env.WORKSPACE}/invoice-service"){
+                    sh "pwd"
                 sh 'mvn test'
+            }
             }
             post {
                 always {
@@ -26,7 +32,10 @@ pipeline {
         }
         stage('Deliver') { 
             steps {
+                dir ("${env.WORKSPACE}/invoice-service"){
+                    sh "pwd"
                 sh './jenkins/scripts/deliver.sh' 
+            }
             }
         }
     }
