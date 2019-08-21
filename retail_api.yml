@@ -44,7 +44,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InvoiceResponseList'
                 
-  /invoice/{invoice_id}:
+  /invoices/{invoice_id}:
     get:
       summary: Get invoice object by id
       description: Queries for invoice object by id
