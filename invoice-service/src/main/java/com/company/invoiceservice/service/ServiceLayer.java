@@ -23,7 +23,17 @@ public class ServiceLayer {
         this.invoiceItemDao = invoiceItemDao;
     }
 
-    public InvoiceViewModel saveInvoice(Invoice invoice) {
+    public InvoiceViewModel saveInvoice(InvoiceViewModel ivm) {
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(ivm.getCustomerId());
+        invoice.setPurchaseDate(ivm.getPurchaseDate());
+        invoice.setInvoiceId(invoiceDao.add(invoice).getInvoiceId());
+        ivm.setInvoiceId(invoice.getInvoiceId());
+        ivm.getInvoiceItemList().stream().forEach(ii -> {
+            ii.setInvoiceId(invoice.getInvoiceId());
+            ii.setInvoiceItemId(invoiceItemDao.add(ii).getInvoiceItemId());
+        });
+
         return buildInvoiceViewModel(invoice);
     }
 

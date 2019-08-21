@@ -65,13 +65,13 @@ public class ServiceLayerTests {
         InvoiceItem invoiceItem = new InvoiceItem();
 
         invoiceItem.setInvoiceItemId(1);
-        invoiceItem.setInvoiceId(invoiceDao.add(invoice).getInvoiceId());
+        invoiceItem.setInvoiceId(1);
         invoiceItem.setInventoryId(1);
         invoiceItem.setQuantity(10);
         invoiceItem.setUnitPrice(new BigDecimal("9.99"));
 
         InvoiceItem invoiceItem1 = new InvoiceItem();
-        invoiceItem1.setInvoiceId(invoiceDao.add(invoice).getInvoiceId());
+        invoiceItem1.setInvoiceId(1);
         invoiceItem1.setInventoryId(1);
         invoiceItem1.setQuantity(10);
         invoiceItem1.setUnitPrice(new BigDecimal("9.99"));
@@ -87,31 +87,26 @@ public class ServiceLayerTests {
 
     @Test
     public void saveInvoice() {
-        Invoice invoice = new Invoice();
-        invoice.setCustomerId(1);
-        invoice.setPurchaseDate(LocalDate.of(2019, 8, 8));
-
-        invoice = invoiceDao.add(invoice);
-
         InvoiceItem invoiceItem = new InvoiceItem();
-        invoiceItem.setInvoiceId(invoice.getInvoiceId());
         invoiceItem.setInventoryId(1);
         invoiceItem.setQuantity(10);
         invoiceItem.setUnitPrice(new BigDecimal("9.99"));
-
-        invoiceItem = invoiceItemDao.add(invoiceItem);
 
         List<InvoiceItem> invoiceItemList = new ArrayList<>();
 
         invoiceItemList.add(invoiceItem);
 
         InvoiceViewModel ivm = new InvoiceViewModel();
-        ivm.setInvoiceId(invoice.getInvoiceId());
         ivm.setCustomerId(1);
         ivm.setPurchaseDate(LocalDate.of(2019,8,8));
         ivm.setInvoiceItemList(invoiceItemList);
 
-        assertEquals(ivm, service.saveInvoice(invoice));
+        InvoiceViewModel ivm1 = ivm;
+        ivm1.setInvoiceId(1);
+
+        ivm.setInvoiceId(service.saveInvoice(ivm).getInvoiceId());
+
+        assertEquals(ivm, ivm1);
     }
 
     @Test

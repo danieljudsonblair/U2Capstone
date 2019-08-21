@@ -18,8 +18,8 @@ public class InvoiceController {
     ServiceLayer service;
 
     @PostMapping
-    public InvoiceViewModel submitInvoice(@RequestBody @Valid Invoice invoice) {
-        return service.saveInvoice(invoice);
+    public InvoiceViewModel submitInvoice(@RequestBody @Valid InvoiceViewModel ivm) {
+        return service.saveInvoice(ivm);
     }
 
     @GetMapping("/{id}")
