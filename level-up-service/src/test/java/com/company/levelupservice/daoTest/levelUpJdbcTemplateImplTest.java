@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -42,8 +43,10 @@ public class levelUpJdbcTemplateImplTest {
         LevelUp levelUp1 = levelUpDao.get(levelUp.getLevelUpId());
         assertEquals(levelUp, levelUp1);
 
-        levelUp1 = levelUpDao.getByCustomerId(1);
-        assertEquals(levelUp, levelUp1);
+        List<LevelUp> levelUpList = new ArrayList<>();
+        levelUpList.add(levelUp);
+
+        assertEquals(levelUpDao.getByCustomerId(1).size(), levelUpList.size());
 
         levelUpDao.delete(levelUp.getLevelUpId());
         levelUp1 = levelUpDao.get(levelUp.getLevelUpId());
