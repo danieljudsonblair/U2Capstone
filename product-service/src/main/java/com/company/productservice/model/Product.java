@@ -1,13 +1,25 @@
 package com.company.productservice.model;
 
+import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Product {
+    @Min(0)
     private int productId;
+    @NotNull(message = "Product must contain field productName")
+    @NotEmpty(message = "productName must not be empty")
     private String productName;
+    @NotNull(message = "Product must contain field productDescription")
+    @NotEmpty(message = "productDescription must not be empty")
     private String productDescription;
+    @NotNull(message = "Product must contain field listPrice")
+    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMax(value = "99999.99", inclusive = true)
     private BigDecimal listPrice;
+    @NotNull(message = "Product must contain field unitCost")
+    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMax(value = "99999.99", inclusive = true)
     private BigDecimal unitCost;
 
     public int getProductId() {
