@@ -71,14 +71,11 @@ public class LevelUpDaoJdbcTemplateImpl implements LevelUpDao {
     }
 
     @Override
-    public LevelUp getByCustomerId(int customer_id) {
-        try {
-            return jdbcTemplate.queryForObject(SELECT_LEVELUP_SQLS_BY_CUSTOMER_ID, this::mapRowToLevelUp, customer_id);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+    public List<LevelUp> getByCustomerId(int customer_id) {
+        return jdbcTemplate.query(SELECT_LEVELUP_SQLS_BY_CUSTOMER_ID, this::mapRowToLevelUp, customer_id);
     }
 
+    @Transactional
     @Override
     public void update(LevelUp levelUp) {
         jdbcTemplate.update(
@@ -90,6 +87,7 @@ public class LevelUpDaoJdbcTemplateImpl implements LevelUpDao {
         );
     }
 
+    @Transactional
     @Override
     public void delete(int id) {
         jdbcTemplate.update(DELETE_LEVELUP_SQL, id);
