@@ -20,14 +20,14 @@ import static org.junit.Assert.assertNull;
 public class InvoiceItemJdbcTemplateImplTests {
 
     @Autowired
-    InvoiceItemDao dao;
+    InvoiceItemDao iiDao;
 
     @Autowired
     InvoiceDao iDao;
 
     @Before
     public void setUp() throws Exception {
-        dao.getAll().stream().forEach(ii -> dao.delete(ii.getInvoiceId()));
+        iiDao.getAll().stream().forEach(ii -> iiDao.delete(ii.getInvoiceItemId()));
         iDao.getAll().stream().forEach(i -> iDao.delete(i.getInvoiceId()));
     }
 
@@ -45,18 +45,18 @@ public class InvoiceItemJdbcTemplateImplTests {
         invoiceItem.setQuantity(1);
         invoiceItem.setUnitPrice(new BigDecimal("9.99"));
 
-        assertEquals(dao.getAll().size(), 0);
-        assertNull(dao.get(1));
+        assertEquals(iiDao.getAll().size(), 0);
+        assertNull(iiDao.get(1));
 
-        dao.add(invoiceItem);
+        iiDao.add(invoiceItem);
 
-        assertEquals(dao.get(invoiceItem.getInvoiceItemId()), invoiceItem);
+        assertEquals(iiDao.get(invoiceItem.getInvoiceItemId()), invoiceItem);
 
-        assertEquals(dao.getAll().size(), 1);
+        assertEquals(iiDao.getAll().size(), 1);
 
-        dao.delete(invoiceItem.getInvoiceItemId());
+        iiDao.delete(invoiceItem.getInvoiceItemId());
 
-        assertNull(dao.get(invoiceItem.getInvoiceItemId()));
+        assertNull(iiDao.get(invoiceItem.getInvoiceItemId()));
     }
 
     @Test
@@ -73,14 +73,36 @@ public class InvoiceItemJdbcTemplateImplTests {
         invoiceItem.setQuantity(1);
         invoiceItem.setUnitPrice(new BigDecimal("9.99"));
 
-        dao.add(invoiceItem);
+        invoiceItem.setInvoiceItemId(iiDao.add(invoiceItem).getInvoiceItemId());
 
         invoiceItem.setInventoryId(2);
         invoiceItem.setQuantity(2);
         invoiceItem.setUnitPrice(new BigDecimal("19.99"));
 
-        dao.update(invoiceItem);
+        iiDao.update(invoiceItem);
 
-        assertEquals(dao.get(invoiceItem.getInvoiceItemId()), invoiceItem);
+        assertEquals(iiDao.get(invoiceItem.getInvoiceItemId()), invoiceItem);
+    }
+
+    @Test
+    public void getByInvoiceId() {
+
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(1);
+        invoice.setPurchaseDate(LocalDate.of(2019, 8,8));
+
+        invoice.setInvoiceId(iDao.add(invoice).getInvoiceId());
+
+        assertEquals(iiDao.getByInvoiceId(invoice.getInvoiceId()).size(), 0);
+
+        InvoiceItem invoiceItem = new InvoiceItem();
+        invoiceItem.setInvoiceId(invoice.getInvoiceId());
+        invoiceItem.setInventoryId(1);
+        invoiceItem.setQuantity(1);
+        invoiceItem.setUnitPrice(new BigDecimal("9.99"));
+
+        iiDao.add(invoiceItem);
+
+        assertEquals(iiDao.getByInvoiceId(invoice.getInvoiceId()).size(), 1);
     }
 }
