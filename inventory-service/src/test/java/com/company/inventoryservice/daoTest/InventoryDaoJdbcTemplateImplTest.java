@@ -1,9 +1,21 @@
 package com.company.inventoryservice.daoTest;
 
+import com.company.inventoryservice.dao.InventoryDao;
+import com.company.inventoryservice.model.Inventory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
 public class InventoryDaoJdbcTemplateImplTest {
 
     @Autowired
@@ -11,9 +23,7 @@ public class InventoryDaoJdbcTemplateImplTest {
 
     @Before
     public void setUp() throws Exception {
-        List<Inventory> inventoryList = inventoryDao.getAllInventories();
-        for(Inventory inventory : inventoryList)
-            inventoryDao.deleteInventory(inventory.getInventoryId());
+        inventoryDao.getAllInventories().stream().forEach(i -> inventoryDao.deleteInventory(i.getInventoryId()));
     }
 
     @Test
@@ -45,7 +55,7 @@ public class InventoryDaoJdbcTemplateImplTest {
 
         inventoryDao.updateInventory(inventory);
 
-        Inventory inventory1 = inventoryDao.getInventory(inventory.getInvertoryId());
+        Inventory inventory1 = inventoryDao.getInventory(inventory.getInventoryId());
         assertEquals(inventory1, inventory);
     }
 
