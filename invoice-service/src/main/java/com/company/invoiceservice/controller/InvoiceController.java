@@ -34,6 +34,17 @@ public class InvoiceController {
 
     @GetMapping("/customer/{id}")
     public List<InvoiceViewModel> getInvoicesByCustomerId(@PathVariable int id) {
-        return null;
+        return service.findByCustomerId(id);
+    }
+
+    @PutMapping("/{id}")
+    public void updateInvoice(@PathVariable int id, @RequestBody InvoiceViewModel ivm) {
+        ivm.setInvoiceId(id);
+        service.updateInvoice(ivm);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteInvoice(@PathVariable int id) {
+        service.deleteInvoice(id);
     }
 }
