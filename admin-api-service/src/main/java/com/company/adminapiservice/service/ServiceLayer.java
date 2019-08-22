@@ -6,6 +6,7 @@ import com.company.adminapiservice.utils.feign.*;
 import com.company.adminapiservice.viewModel.ProductView;
 import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
+import org.aspectj.weaver.ast.Not;
 import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -86,6 +87,15 @@ public class ServiceLayer {
         return levelUpClient.getLevelUpByCustomerId(customer_id);
     }
 
+    public List<Product> fetchProductsByInvoiceId(int invoice_id) {
+        List<Product> pList = new ArrayList<>();
+        invoiceClient.getInvoiceById(invoice_id).getInvoiceItemList().stream().forEach(ii -> {
+            pList.add(productClient.getProduct(inventoryClient.getInventory(ii.getInventoryId()).getProductId()));
+        });
+
+        return pList;
+    }
+
     public InvoiceView fetchInvoice(int invoice_id) {
         return invoiceClient.getInvoiceById(invoice_id);
     }
@@ -104,6 +114,10 @@ public class ServiceLayer {
 
     public List<Product> fetchAllProducts() {
         return productClient.getAllProducts();
+    }
+
+    public List<InvoiceView> fetchAllInvoices() {
+        return invoiceClient.getAllInvoices();
     }
 
     public List<Product> fetchProductsInInventory() {
@@ -206,6 +220,23 @@ public class ServiceLayer {
         productClient.updateProduct(up);
     }
 
+    public void updateInvoice(InvoiceView invoiceView) {
+        InvoiceView ui = invoiceClient.getInvoiceById(invoiceView.getInvoiceId());
+
+        if (ui == null)
+            throw new NotFoundException(notFound("invoice", invoiceView.getInvoiceId()));
+        if (invoiceView.getCustomerId() == 0)
+            throw new NotFoundException(notFound("custoer", invoiceView.getCustomerId()));
+        if (invoiceView.getPurchaseDate() != null)
+            ui.setPurchaseDate(invoiceView.getPurchaseDate());
+        if (invoiceView.getInvoiceItemList() != null && invoiceView.getInvoiceItemList().size() == 0)
+            throw new IllegalArgumentException("invoiceItem list cannot be an empty list");
+        if (invoiceView.getInvoiceItemList() != null)
+            ui.setInvoiceItemList(invoiceView.getInvoiceItemList());
+
+        invoiceClient.updateInvoice(ui);
+    }
+
     public void deleteCustomer(int customer_id) {
         if (customerClient.fetchCustomer(customer_id) == null)
             throw new NotFoundException(notFound("customer", customer_id));
@@ -232,6 +263,13 @@ public class ServiceLayer {
             throw new NotFoundException(notFound("levelUp", levelUp_id));
 
         levelUpClient.deleteLevelUp(levelUp_id);
+    }
+
+    public void deleteInvoice(int invoiceView_id) {
+        if (invoiceClient.getInvoiceById(invoiceView_id) == null)
+            throw new NotFoundException(notFound("invoice", invoiceView_id));
+
+        invoiceClient.deleteInvoice(invoiceView_id);
     }
 
     private PurchaseReturnViewModel buildPurchaseReturnViewModel(PurchaseSendViewModel psvm) {

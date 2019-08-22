@@ -239,8 +239,8 @@ public class ServiceLayerTests {
         assertEquals(service.fetchAllProducts().size(), 1);
         assertEquals(service.fetchProductsInInventory().size(), 1);
         assertEquals(service.fetchProductsInInventory().get(0), product1);
-//        assertEquals(product1, service.fetchProductsByInvoiceId(1).get(0));
-//        assertEquals(service.fetchProductsByInvoiceId(1).size(), 1);
+        assertEquals(product1, service.fetchProductsByInvoiceId(1).get(0));
+        assertEquals(service.fetchProductsByInvoiceId(1).size(), 1);
     }
 
     @Test
@@ -317,7 +317,7 @@ public class ServiceLayerTests {
     }
 
     @Test
-    public void fetchInvoiceById(){
+    public void fetchAllFetchInvoiceById(){
         InvoiceItem ii = new InvoiceItem();
         ii.setInvoiceItemId(1);
         ii.setInvoiceId(1);
@@ -336,6 +336,8 @@ public class ServiceLayerTests {
         invoiceView.setPurchaseDate(LocalDate.of(2019, 8,8));
 
         assertEquals(invoiceView, service.fetchInvoice(1));
+        assertEquals(invoiceView, service.fetchAllInvoices().get(0));
+        assertEquals(service.fetchAllInvoices().size(), 1);
     }
 
     @Test
@@ -397,6 +399,32 @@ public class ServiceLayerTests {
     }
 
     @Test
+    public void updateInvoice() {
+        InvoiceItem ii = new InvoiceItem();
+        ii.setInvoiceItemId(1);
+        ii.setInvoiceId(1);
+        ii.setInventoryId(1);
+        ii.setUnitPrice(new BigDecimal ("29.99"));
+        ii.setQuantity(1);
+
+        List<InvoiceItem> iiList = new ArrayList<>();
+        iiList.add(ii);
+
+        InvoiceView invoiceView = new InvoiceView();
+
+        invoiceView.setInvoiceId(1);
+        invoiceView.setInvoiceItemList(iiList);
+        invoiceView.setCustomerId(1);
+        invoiceView.setPurchaseDate(LocalDate.of(2020, 8,8));
+
+        service.updateInvoice(invoiceView);
+
+        ArgumentCaptor<InvoiceView> invoiceViewCaptor = ArgumentCaptor.forClass(InvoiceView.class);
+        verify(invoiceClient).updateInvoice(invoiceViewCaptor.capture());
+        assertEquals(invoiceView.getPurchaseDate(), invoiceViewCaptor.getValue().getPurchaseDate());
+    }
+
+    @Test
     public void deleteCustomer() {
         Customer customer = new Customer();
         customer.setCustomerId(1);
@@ -442,5 +470,17 @@ public class ServiceLayerTests {
         ArgumentCaptor<Integer> levelUpCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(levelUpClient).deleteLevelUp(levelUpCaptor.capture());
         assertEquals(levelUp.getLevelUpId(), levelUpCaptor.getValue().intValue());
+    }
+
+    @Test
+    public void deleteInvoice() {
+        InvoiceView invoiceView = new InvoiceView();
+        invoiceView.setInvoiceId(1);
+
+        service.deleteInvoice(invoiceView.getInvoiceId());
+
+        ArgumentCaptor<Integer> invoiceViewCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(invoiceClient).deleteInvoice(invoiceViewCaptor.capture());
+        assertEquals(invoiceView.getInvoiceId(), invoiceViewCaptor.getValue().intValue());
     }
 }
