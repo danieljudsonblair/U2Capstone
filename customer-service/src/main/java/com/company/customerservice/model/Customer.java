@@ -1,15 +1,32 @@
 package com.company.customerservice.model;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class Customer {
+
     private int customerId;
+    @NotNull
+    @NotEmpty
     private String firstName;
+    @NotNull
+    @NotEmpty
     private String lastName;
+    @NotNull
+    @NotEmpty
     private String street;
+    @NotNull
+    @NotEmpty
     private String city;
+    @NotNull
+    @NotEmpty
     private String zip;
+    @NotNull
+    @NotEmpty
     private String email;
+    @NotNull
+    @NotEmpty
     private String phone;
 
     public int getCustomerId() {

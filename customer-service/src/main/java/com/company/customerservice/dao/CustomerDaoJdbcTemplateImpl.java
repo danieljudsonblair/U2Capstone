@@ -2,12 +2,16 @@ package com.company.customerservice.dao;
 
 import com.company.customerservice.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+@Repository
 public class CustomerDaoJdbcTemplateImpl implements CustomerDao{
 
     private JdbcTemplate jdbcTemplate;
@@ -25,29 +29,61 @@ public class CustomerDaoJdbcTemplateImpl implements CustomerDao{
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional
     @Override
     public Customer addCustomer(Customer customer) {
-        return null;
+        jdbcTemplate.update(
+                INSERT_CUSTOMER_SQL,
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getStreet(),
+                customer.getCity(),
+                customer.getZip(),
+                customer.getEmail(),
+                customer.getPhone()
+        );
+
+        int id = jdbcTemplate.queryForObject("select LAST_INSERT_ID()", Integer.class);
+
+        customer.setCustomerId(id);
+
+        return customer;
     }
 
     @Override
     public Customer getCustomer(int customerId) {
-        return null;
+        try {
+            return jdbcTemplate.queryForObject(SELECT_CUSTOMER, this::mapRowToCustomer, customerId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
     public List<Customer> getAllCustomers() {
-        return null;
+        return jdbcTemplate.query(SELECT_ALL_CUSTOMERS_SQL, this::mapRowToCustomer);
     }
 
+    @Transactional
     @Override
     public void updateCustomer(Customer customer) {
-
+        jdbcTemplate.update(
+                UPDATE_CUSTOMER,
+                customer.getFirstName(),
+                customer.getLastName(),
+                customer.getStreet(),
+                customer.getCity(),
+                customer.getZip(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getCustomerId()
+        );
     }
 
+    @Transactional
     @Override
     public void deleteCustomer(int customerId) {
-
+        jdbcTemplate.update(DELETE_CUSTOMER, customerId);
     }
 
     private Customer mapRowToCustomer(ResultSet rs, int rowNum) throws SQLException {
@@ -60,5 +96,7 @@ public class CustomerDaoJdbcTemplateImpl implements CustomerDao{
         customer.setZip(rs.getString("zip"));
         customer.setEmail(rs.getString("email"));
         customer.setPhone(rs.getString("phone"));
+
+        return customer;
     }
 }
