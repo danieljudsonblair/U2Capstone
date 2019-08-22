@@ -6,16 +6,11 @@ import com.company.adminapiservice.utils.feign.*;
 import com.company.adminapiservice.viewModel.ProductView;
 import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
-import org.aspectj.weaver.ast.Not;
-import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.nio.channels.IllegalChannelGroupException;
-import java.time.LocalDate;
+import java.math.BigDecimal;import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -52,6 +47,8 @@ public class ServiceLayer {
     }
 
     public Inventory saveInventory(Inventory inventory) {
+        if (productClient.getProduct(inventory.getProductId()) == null)
+            throw new NotFoundException(notFound("product", inventory.getProductId()));
         return inventoryClient.createInventory(inventory);
     }
 
@@ -171,12 +168,16 @@ public class ServiceLayer {
         Inventory ui = inventoryClient.getInventory(inventory.getInventoryId());
         if (ui == null)
             throw new NotFoundException(notFound("inventory", inventory.getInventoryId()));
-        if (productClient.getProduct(inventory.getProductId()) == null)
+        if (productClient.getProduct(ui.getProductId()) == null)
             throw new NotFoundException(notFound("product", inventory.getProductId()));
         if (inventory.getQuantity() < 0)
             throw new IllegalArgumentException("Quantity cannot be updated to a value less than 0");
+        ui.setQuantity(inventory.getQuantity());
+        if (ui.getProductId() == 0)
+            throw new NotFoundException("Product id cannot be zero or missing");
 
-        inventoryClient.updateInventory(inventory);
+
+        inventoryClient.updateInventory(ui);
     }
 
     public void updateLevelUp(LevelUp levelUp) {
@@ -286,7 +287,7 @@ public class ServiceLayer {
         } else if (psvm.getCustomer() != null && psvm.getCustomerId() == 0){
             prvm.setCustomer(customerClient.createCustomer(psvm.getCustomer()));
         }
-        psvm.getInventoryList().stream().forEach(i -> {
+        psvm.getInventoryList().forEach(i -> {
             Inventory clientInventory = inventoryClient.getInventory(i.getInventoryId());
             Inventory updatedInventory = new Inventory();
             InvoiceItem ii = new InvoiceItem();

@@ -19,9 +19,9 @@ public interface InventoryClient {
     @GetMapping(value = "/inventory")
     public List<Inventory> getAllInventory();
 
-    @PutMapping(value = "/inventory/{inventory_id}")
+    @PutMapping(value = "/inventory/{id}")
     public void updateInventory(@RequestBody Inventory inventory);
 
-    @DeleteMapping(value = "/inventory/{inventory_id}")
-    public void deleteInventory(int inventory_id);
+    @DeleteMapping(value = "/inventory/{id}")
+    public void deleteInventory(@PathVariable int id);
 }
