@@ -93,20 +93,28 @@ public class ServiceLayerTests {
         invoiceClient = mock(InvoiceClient.class);
 
         InvoiceItem invoiceItem = new InvoiceItem();
-        invoiceItem.setInvoiceItemId(1);
-        invoiceItem.setInvoiceId(1);
         invoiceItem.setInventoryId(1);
-        invoiceItem.setQuantity(10);
-        invoiceItem.setUnitPrice(new BigDecimal("9.99"));
+        invoiceItem.setQuantity(1);
+        invoiceItem.setUnitPrice(new BigDecimal("19.99"));
+
+        InvoiceItem invoiceItem1 = new InvoiceItem();
+        invoiceItem1.setInvoiceItemId(1);
+        invoiceItem1.setInvoiceId(1);
+        invoiceItem1.setInventoryId(1);
+        invoiceItem1.setQuantity(1);
+        invoiceItem1.setUnitPrice(new BigDecimal("19.99"));
 
         List<InvoiceItem> iiList = new ArrayList<>();
         iiList.add(invoiceItem);
+
+        List<InvoiceItem> iiList1 = new ArrayList<>();
+        iiList1.add(invoiceItem1);
 
         InvoiceView invoiceView = new InvoiceView();
         invoiceView.setInvoiceId(1);
         invoiceView.setCustomerId(1);
         invoiceView.setPurchaseDate(LocalDate.of(2019,8,8));
-        invoiceView.setInvoiceItemList(iiList);
+        invoiceView.setInvoiceItemList(iiList1);
 
         InvoiceView invoiceView1 = new InvoiceView();
         invoiceView1.setCustomerId(1);
@@ -141,6 +149,7 @@ public class ServiceLayerTests {
         doReturn(levelUp).when(levelUpClient).createLevelUp(levelUp1);
         doReturn(levelUp).when(levelUpClient).getLevelUp(1);
         doReturn(lUpList).when(levelUpClient).getAllLevelUps();
+        doReturn(lUpList).when(levelUpClient).getLevelUpByCustomerId(1);
     }
 
     public void setUpProductClientMock() {
@@ -250,12 +259,15 @@ public class ServiceLayerTests {
         assertEquals(levelUp1, service.saveLevelUp(levelUp));
         assertEquals(levelUp1, service.fetchLevelUp(levelUp1.getLevelUpId()));
         assertEquals(service.fetchAllLevelUps().size(), 1);
+        assertEquals(service.fetchLevelUpByCustomerId(1).size(), 1);
+        assertEquals(service.fetchLevelUpByCustomerId(1).get(0), levelUp1);
     }
 
     @Test
     public void savePurchase() {
         PurchaseSendViewModel psvm = new PurchaseSendViewModel();
         psvm.setCustomerId(1);
+        psvm.setPurchaseDate(LocalDate.of(2019,8,8));
 
         InventoryView inventory = new Inventory();
         inventory.setInventoryId(1);
@@ -277,15 +289,53 @@ public class ServiceLayerTests {
         psvm.setInventoryList(iList);
 
         PurchaseReturnViewModel prvm = new PurchaseReturnViewModel();
+        Invoice invoice = new Invoice();
+        invoice.setInvoiceId(1);
+        invoice.setCustomerId(1);
+        invoice.setPurchaseDate(LocalDate.of(2019,8,8));
 
-        prvm.setInvoice(invoiceClient.getInvoiceById(1));
-        prvm.setCustomer(customerClient.fetchCustomer(prvm.getInvoice().getCustomerId()));
+        Customer customer = new Customer();
+        customer.setCustomerId(1);
+        customer.setFirstName("first");
+        customer.setLastName("last");
+        customer.setStreet("street");
+        customer.setCity("city");
+        customer.setZip("12345");
+        customer.setEmail("firstlast@company.com");
+        customer.setPhone("123-456-7891");
+
+        prvm.setInvoice(invoice);
+        prvm.setCustomer(customer);
         prvm.setProductList(pList);
         prvm.setTotalPrice(new BigDecimal("19.99"));
         prvm.setLvlUpPtsAfterPurchase(10);
         prvm.setLvlUpPtsBeforePurchase(10);
 
-        assertEquals(prvm, service.saveInvoice(psvm));
+        PurchaseReturnViewModel prvm1 = service.saveInvoice(psvm);
+
+        assertEquals(prvm, prvm1);
+    }
+
+    @Test
+    public void fetchInvoiceById(){
+        InvoiceItem ii = new InvoiceItem();
+        ii.setInvoiceItemId(1);
+        ii.setInvoiceId(1);
+        ii.setInventoryId(1);
+        ii.setUnitPrice(new BigDecimal ("19.99"));
+        ii.setQuantity(1);
+
+        List<InvoiceItem> iiList = new ArrayList<>();
+        iiList.add(ii);
+
+        InvoiceView invoiceView = new InvoiceView();
+
+        invoiceView.setInvoiceId(1);
+        invoiceView.setInvoiceItemList(iiList);
+        invoiceView.setCustomerId(1);
+        invoiceView.setPurchaseDate(LocalDate.of(2019, 8,8));
+
+        assertEquals(invoiceView, service.fetchInvoice(1));
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.company.adminapiservice.viewModel;
 import com.company.adminapiservice.model.Customer;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,6 +13,7 @@ public class PurchaseSendViewModel {
     private Customer customer;
     @NotNull(message = "You must purchase at least one item")
     private List<InventoryView> inventoryList;
+    private LocalDate purchaseDate;
 
     public int getCustomerId() {
         return customerId;
@@ -37,6 +39,14 @@ public class PurchaseSendViewModel {
         this.inventoryList = inventoryList;
     }
 
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,11 +54,12 @@ public class PurchaseSendViewModel {
         PurchaseSendViewModel that = (PurchaseSendViewModel) o;
         return getCustomerId() == that.getCustomerId() &&
                 getCustomer().equals(that.getCustomer()) &&
-                getInventoryList().equals(that.getInventoryList());
+                getInventoryList().equals(that.getInventoryList()) &&
+                getPurchaseDate().equals(that.getPurchaseDate());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCustomerId(), getCustomer(), getInventoryList());
+        return Objects.hash(getCustomerId(), getCustomer(), getInventoryList(), getPurchaseDate());
     }
 }

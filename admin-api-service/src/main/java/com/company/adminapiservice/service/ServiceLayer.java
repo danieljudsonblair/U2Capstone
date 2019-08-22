@@ -1,11 +1,9 @@
 package com.company.adminapiservice.service;
 
 import com.company.adminapiservice.exception.NotFoundException;
-import com.company.adminapiservice.model.Customer;
-import com.company.adminapiservice.model.Inventory;
-import com.company.adminapiservice.model.LevelUp;
-import com.company.adminapiservice.model.Product;
+import com.company.adminapiservice.model.*;
 import com.company.adminapiservice.utils.feign.*;
+import com.company.adminapiservice.viewModel.ProductView;
 import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
 import org.omg.CosNaming.NamingContextPackage.NotFound;
@@ -13,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.nio.channels.IllegalChannelGroupException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -79,6 +80,14 @@ public class ServiceLayer {
 
     public LevelUp fetchLevelUp(int levelUp_id) {
         return levelUpClient.getLevelUp(levelUp_id);
+    }
+
+    public List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
+        return levelUpClient.getLevelUpByCustomerId(customer_id);
+    }
+
+    public InvoiceView fetchInvoice(int invoice_id) {
+        return invoiceClient.getInvoiceById(invoice_id);
     }
 
     public List<Customer> fetchAllCustomers() {
@@ -227,6 +236,10 @@ public class ServiceLayer {
 
     private PurchaseReturnViewModel buildPurchaseReturnViewModel(PurchaseSendViewModel psvm) {
         PurchaseReturnViewModel prvm = new PurchaseReturnViewModel();
+        List<ProductView> pvList = new ArrayList<>();
+        List<InvoiceItem> iiList = new ArrayList<>();
+        BigDecimal invoiceTotalPrice = new BigDecimal("0");
+
         if (psvm.getCustomer() == null) {
             Customer customer = customerClient.fetchCustomer(psvm.getCustomerId());
             if (customer == null)
@@ -238,16 +251,79 @@ public class ServiceLayer {
         psvm.getInventoryList().stream().forEach(i -> {
             Inventory clientInventory = inventoryClient.getInventory(i.getInventoryId());
             Inventory updatedInventory = new Inventory();
+            InvoiceItem ii = new InvoiceItem();
+
             if (clientInventory == null)
                 throw new NotFoundException(notFound("inventory", i.getInventoryId()));
-            if (clientInventory.getQuantity() >= i.getQuantity())
+            if (clientInventory.getQuantity() < i.getQuantity())
+                throw new IllegalArgumentException("You must select a lower quantity");
+
                 updatedInventory.setInventoryId(i.getInventoryId());
                 updatedInventory.setQuantity(clientInventory.getQuantity() - i.getQuantity());
-                inventoryClient.updateInventory(updatedInventory);
-        });
-        // TODO set product list
 
+                inventoryClient.updateInventory(updatedInventory);
+                ii.setInventoryId(i.getInventoryId());
+
+                pvList.add(productToProductView(productClient.getProduct(inventoryClient.getInventory(i.getInventoryId()).getProductId())));
+                pvList.stream().forEach(pv -> {
+                    pv.setQuantity(BigDecimal.valueOf(i.getQuantity()));
+                    pv.setProductTotal(BigDecimal.valueOf(i.getQuantity()).multiply(pv.getListPrice()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                    ii.setUnitPrice(pv.getListPrice());
+                    ii.setQuantity(pv.getQuantity().intValue());
+                    iiList.add(ii);
+                });
+        });
+        prvm.setProductList(pvList);
+
+        for(ProductView pv : pvList) {
+            invoiceTotalPrice = invoiceTotalPrice.add(pv.getProductTotal());
+        }
+        prvm.setTotalPrice(invoiceTotalPrice);
+
+        int preLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0).getPoints();
+        int postLevelUp;
+        LevelUp clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
+        LevelUp newLevelUp = new LevelUp();
+        if (clientLevelUp == null) {
+            newLevelUp.setMemberDate(LocalDate.now());
+            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+            newLevelUp.setPoints(invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10);
+
+            postLevelUp = preLevelUp + levelUpClient.createLevelUp(newLevelUp).getPoints();
+        } else {
+            postLevelUp = preLevelUp + (invoiceTotalPrice.divide(new BigDecimal("50")).setScale(0, BigDecimal.ROUND_FLOOR).intValue() * 10);
+            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+            newLevelUp.setPoints(postLevelUp);
+
+            if (postLevelUp != preLevelUp)
+                levelUpClient.updateLevelUp(newLevelUp);
+        }
+
+        prvm.setLvlUpPtsBeforePurchase(preLevelUp);
+        prvm.setLvlUpPtsAfterPurchase(postLevelUp);
+        InvoiceView iv = new InvoiceView();
+        Invoice invoice = new Invoice();
+
+        iv.setCustomerId(prvm.getCustomer().getCustomerId());
+        iv.setPurchaseDate(psvm.getPurchaseDate());
+        iv.setInvoiceItemList(iiList);
+
+        iv = invoiceClient.createInvoice(iv);
+        invoice.setPurchaseDate(iv.getPurchaseDate());
+        invoice.setCustomerId(prvm.getCustomer().getCustomerId());
+        invoice.setInvoiceId(iv.getInvoiceId());
+
+        prvm.setInvoice(invoice);
 
         return prvm;
+    }
+
+    private ProductView productToProductView(Product product) {
+        ProductView pv = new ProductView();
+        pv.setProductName(product.getProductName());
+        pv.setProductDescription(product.getProductDescription());
+        pv.setListPrice(product.getListPrice());
+
+        return pv;
     }
 }

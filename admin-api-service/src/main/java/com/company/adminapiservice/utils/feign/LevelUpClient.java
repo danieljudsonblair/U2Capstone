@@ -10,18 +10,21 @@ import java.util.List;
 @FeignClient(name = "level-up-service")
 public interface LevelUpClient {
 
-    @PostMapping(value = "/levelup")
+    @PostMapping(value = "/levelups")
     public LevelUp createLevelUp(@RequestBody @Valid LevelUp levelUp);
 
-    @GetMapping(value = "/levelup/{id}")
+    @GetMapping(value = "/levelups/{id}")
     public LevelUp getLevelUp(@PathVariable int id);
 
-    @GetMapping(value = "/levelup")
+    @GetMapping(value = "/levelups")
     public List<LevelUp> getAllLevelUps();
 
-    @PutMapping(value = "/levelup/{levelup_id}")
+    @GetMapping(value = "/levelups/customer/{customer_id}")
+    public List<LevelUp> getLevelUpByCustomerId(int customer_id);
+
+    @PutMapping(value = "/levelups/{levelup_id}")
     public void updateLevelUp(@RequestBody LevelUp levelUp);
 
-    @DeleteMapping(value = "/levelup/{levelup_id}")
+    @DeleteMapping(value = "/levelups/{levelup_id}")
     public void deleteLevelUp(int levelup_id);
 }
