@@ -17,7 +17,7 @@ public class CustomerController {
 
     @PostMapping
     public Customer createCustomer(@RequestBody @Valid Customer customer){
-        return customerDao.createCustomer(customer);
+        return customerDao.addCustomer(customer);
     }
 
     @GetMapping("/{customerId}")
