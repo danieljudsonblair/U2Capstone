@@ -58,15 +58,15 @@ public class ServiceLayer {
     }
 
     public Product getProductByProductId(int productId){
-        return productClient.fetchProduct(productId);
+        return productClient.getProductById(productId);
     }
 
     public List<Product> getProductsInInventory(){
         List<Product> inventoryProducts = new ArrayList<>();
-        List<Inventory> allInventories = inventoryClient.fetchAllInventories();
+        List<Inventory> allInventories = inventoryClient.getAllInventorys();
         for (Inventory inventory: allInventories){
             if(inventory.getQuantity()>0){
-                inventoryProducts.add(productClient.fetchProduct(inventory.getProductId()));
+                inventoryProducts.add(productClient.getProductById(inventory.getProductId()));
             }
         }return inventoryProducts;
 
@@ -77,22 +77,22 @@ public class ServiceLayer {
         InvoiceView invoiceView = invoiceClient.fetchInvoicesById(invoiceId);
         List<InvoiceItem> itemList = invoiceView.getInvoiceItemList();
         for (InvoiceItem invoiceItem: itemList){
-            int productId = inventoryClient.fetchInventoryById(invoiceItem.getInventoryId()).getProductId();
-            invoiceProducts.add(productClient.fetchProduct(productId));
+            int productId = inventoryClient.getInventoryById(invoiceItem.getInventoryId()).getProductId();
+            invoiceProducts.add(productClient.getProductById(productId));
         } return invoiceProducts;
 
     }
 
     public List<LevelUp> getLevelUpPointsByCustomerId(int customerId){
-        return levelUpClient.fetchLevelUpPointByCustomerId(customerId);
+        return levelUpClient.getLevelUpsByCustomerId(customerId);
     }
 
     public List<Inventory> getAllInventories(){
-        return inventoryClient.fetchAllInventories();
+        return inventoryClient.getAllInventorys();
     }
 
     public Inventory getInventoryById(int inventoryId){
-        return inventoryClient.fetchInventoryById(inventoryId);
+        return inventoryClient.getInventoryById(inventoryId);
     }
 
 
