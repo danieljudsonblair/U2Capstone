@@ -1,10 +1,7 @@
 package com.company.retailapiservice.service;
 
 import com.company.retailapiservice.exception.NotFoundException;
-import com.company.retailapiservice.model.Inventory;
-import com.company.retailapiservice.model.InvoiceItem;
-import com.company.retailapiservice.model.InvoiceView;
-import com.company.retailapiservice.model.Product;
+import com.company.retailapiservice.model.*;
 import com.company.retailapiservice.util.feign.InventoryClient;
 import com.company.retailapiservice.util.feign.InvoiceClient;
 import com.company.retailapiservice.util.feign.LevelUpClient;
@@ -84,8 +81,16 @@ public class ServiceLayer {
 
     }
 
-    public int getLevelUpPointsByCustomerId(int customerId){
+    public List<LevelUp> getLevelUpPointsByCustomerId(int customerId){
         return levelUpClient.fetchLevelUpPointByCustomerId(customerId);
+    }
+
+    public List<Inventory> getAllInventories(){
+        return inventoryClient.fetchAllInventories();
+    }
+
+    public Inventory getInventoryById(int inventoryId){
+        return inventoryClient.fetchInventoryById(inventoryId);
     }
 
 
