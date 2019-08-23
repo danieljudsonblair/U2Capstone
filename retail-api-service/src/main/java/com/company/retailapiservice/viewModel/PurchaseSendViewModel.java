@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class PurchaseSendViewModel {
+
     private int customerId;
     private Customer customer;
     @NotNull(message = "You must purchase at least one item")

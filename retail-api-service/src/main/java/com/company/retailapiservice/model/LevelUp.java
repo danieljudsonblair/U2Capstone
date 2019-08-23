@@ -14,7 +14,6 @@ public class LevelUp {
     @Min(0)
     private int points;
     @NotNull(message = "LevelUp object must contain property memberDate")
-    @NotEmpty(message = "memberDate must be in format YYYY-MM-DD")
     private LocalDate memberDate;
 
     public int getLevelUpId() {
