@@ -3,6 +3,7 @@ package com.company.productservice.controller;
 import com.company.productservice.dao.ProductDao;
 import com.company.productservice.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RefreshScope
 @RequestMapping("/products")
 public class ProductController {
 
@@ -23,11 +25,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable int id) {
-        try {
-            return dao.getProduct(id);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+         return dao.getProduct(id);
     }
 
     @GetMapping
@@ -35,9 +33,8 @@ public class ProductController {
         return dao.getAllProducts();
     }
 
-    @PutMapping("/{id}")
-    public void updateProduct(@PathVariable int id, @RequestBody Product product) {
-        product.setProductId(id);
+    @PutMapping
+    public void updateProduct(@RequestBody Product product) {
         dao.updateProduct(product);
     }
 

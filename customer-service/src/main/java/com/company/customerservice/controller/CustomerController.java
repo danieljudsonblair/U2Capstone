@@ -32,9 +32,8 @@ public class CustomerController {
         return customerDao.getAllCustomers();
     }
 
-    @PutMapping("/{customerId}")
-    public void updateCustomer(@PathVariable int customerId, @RequestBody Customer customer){
-        customer.setCustomerId(customerId);
+    @PutMapping
+    public void updateCustomer(@RequestBody Customer customer){
         customerDao.updateCustomer(customer);
     }
 

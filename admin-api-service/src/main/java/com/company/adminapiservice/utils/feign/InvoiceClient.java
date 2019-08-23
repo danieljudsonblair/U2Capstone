@@ -19,7 +19,7 @@ public interface InvoiceClient {
     @GetMapping(value = "/invoices/{invoice_id}")
     public InvoiceView getInvoiceById(@PathVariable int invoice_id);
 
-    @PutMapping(value = "/invoices/{invoice_id}")
+    @PutMapping(value = "/invoices")
     public void updateInvoice(@RequestBody InvoiceView iv);
 
     @DeleteMapping(value = "/invoices/{invoice_id}")

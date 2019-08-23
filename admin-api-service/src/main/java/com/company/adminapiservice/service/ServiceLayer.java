@@ -3,13 +3,15 @@ package com.company.adminapiservice.service;
 import com.company.adminapiservice.exception.NotFoundException;
 import com.company.adminapiservice.model.*;
 import com.company.adminapiservice.utils.feign.*;
+import com.company.adminapiservice.viewModel.InventoryView;
 import com.company.adminapiservice.viewModel.ProductView;
 import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,8 +122,8 @@ public class ServiceLayer {
     public List<Product> fetchProductsInInventory() {
         List<Product> pList = new ArrayList<>();
         inventoryClient.getAllInventory().stream().forEach(i -> {
-           if (i.getQuantity() > 0)
-               pList.add(productClient.getProduct(i.getProductId()));
+            if (i.getQuantity() > 0)
+                pList.add(productClient.getProduct(i.getProductId()));
         });
 
         return pList;
@@ -173,9 +175,6 @@ public class ServiceLayer {
         if (inventory.getQuantity() < 0)
             throw new IllegalArgumentException("Quantity cannot be updated to a value less than 0");
         ui.setQuantity(inventory.getQuantity());
-        if (ui.getProductId() == 0)
-            throw new NotFoundException("Product id cannot be zero or missing");
-
 
         inventoryClient.updateInventory(ui);
     }
@@ -208,12 +207,12 @@ public class ServiceLayer {
         if (product.getProductDescription() != null)
             up.setProductDescription(product.getProductDescription());
         if (product.getListPrice() != null && (product.getListPrice().compareTo(min) < 0 ||
-                                                product.getListPrice().compareTo(max) > 0))
+                product.getListPrice().compareTo(max) > 0))
             throw new IllegalArgumentException("listPrice must be between " + min + " and " + max);
         if (product.getListPrice() != null)
             up.setListPrice(product.getListPrice().setScale(2, BigDecimal.ROUND_FLOOR));
         if (product.getUnitCost() != null && (product.getUnitCost().compareTo(min) < 0 ||
-                                                product.getUnitCost().compareTo(max) > 0))
+                product.getUnitCost().compareTo(max) > 0))
             throw new IllegalArgumentException("unitCost must be between " + min + " and " + max);
         if (product.getUnitCost() != null)
             up.setUnitCost(product.getUnitCost().setScale(2, BigDecimal.ROUND_FLOOR));
@@ -252,7 +251,7 @@ public class ServiceLayer {
         inventoryClient.deleteInventory(inventory_id);
     }
 
-    public  void deleteProduct(int product_id) {
+    public void deleteProduct(int product_id) {
         if (productClient.getProduct(product_id) == null)
             throw new NotFoundException(notFound("product", product_id));
 
@@ -277,69 +276,85 @@ public class ServiceLayer {
         PurchaseReturnViewModel prvm = new PurchaseReturnViewModel();
         List<ProductView> pvList = new ArrayList<>();
         List<InvoiceItem> iiList = new ArrayList<>();
+        List<InventoryView> ivList;
         BigDecimal invoiceTotalPrice = new BigDecimal("0");
+        Inventory clientInventory;
+        Product clientProduct;
+        Inventory updatedInventory = new Inventory();
+
 
         if (psvm.getCustomer() == null) {
             Customer customer = customerClient.fetchCustomer(psvm.getCustomerId());
             if (customer == null)
                 throw new NotFoundException(notFound("customer", psvm.getCustomerId()));
             prvm.setCustomer(customer);
-        } else if (psvm.getCustomer() != null && psvm.getCustomerId() == 0){
+        } else if (psvm.getCustomer() != null && psvm.getCustomerId() == 0) {
             prvm.setCustomer(customerClient.createCustomer(psvm.getCustomer()));
         }
-        psvm.getInventoryList().forEach(i -> {
-            Inventory clientInventory = inventoryClient.getInventory(i.getInventoryId());
-            Inventory updatedInventory = new Inventory();
+
+        ivList = psvm.getInventoryList();
+        for (InventoryView i : ivList) {
             InvoiceItem ii = new InvoiceItem();
+            ProductView pv = new ProductView();
+            clientInventory = inventoryClient.getInventory(i.getInventoryId());
+            clientProduct = productClient.getProduct(clientInventory.getProductId());
+
 
             if (clientInventory == null)
                 throw new NotFoundException(notFound("inventory", i.getInventoryId()));
             if (clientInventory.getQuantity() < i.getQuantity())
                 throw new IllegalArgumentException("You must select a lower quantity");
 
-                updatedInventory.setInventoryId(i.getInventoryId());
-                updatedInventory.setQuantity(clientInventory.getQuantity() - i.getQuantity());
+            updatedInventory.setInventoryId(i.getInventoryId());
+            updatedInventory.setProductId(clientInventory.getProductId());
+            updatedInventory.setQuantity(clientInventory.getQuantity() - i.getQuantity());
 
-                inventoryClient.updateInventory(updatedInventory);
-                ii.setInventoryId(i.getInventoryId());
+            inventoryClient.updateInventory(updatedInventory);
+            ii.setInventoryId(i.getInventoryId());
 
-                pvList.add(productToProductView(productClient.getProduct(inventoryClient.getInventory(i.getInventoryId()).getProductId())));
-                pvList.stream().forEach(pv -> {
-                    pv.setQuantity(BigDecimal.valueOf(i.getQuantity()));
-                    pv.setProductTotal(BigDecimal.valueOf(i.getQuantity()).multiply(pv.getListPrice()).setScale(2, BigDecimal.ROUND_HALF_UP));
-                    ii.setUnitPrice(pv.getListPrice());
-                    ii.setQuantity(pv.getQuantity().intValue());
-                    iiList.add(ii);
-                });
-        });
+            pv.setListPrice(clientProduct.getListPrice());
+            pv.setQuantity(BigDecimal.valueOf(i.getQuantity()));
+            pv.setProductTotal(pv.getQuantity().multiply(pv.getListPrice()).setScale(2, BigDecimal.ROUND_HALF_UP));
+            pv.setProductName(clientProduct.getProductName());
+            pv.setProductDescription(clientProduct.getProductDescription());
+            ii.setUnitPrice(pv.getListPrice());
+            ii.setQuantity(pv.getQuantity().intValue());
+            iiList.add(ii);
+
+            pvList.add(pv);
+        }
         prvm.setProductList(pvList);
 
-        for(ProductView pv : pvList) {
-            invoiceTotalPrice = invoiceTotalPrice.add(pv.getProductTotal());
+        for (ProductView p : pvList) {
+            invoiceTotalPrice = invoiceTotalPrice.add(p.getProductTotal());
         }
         prvm.setTotalPrice(invoiceTotalPrice);
+        LevelUp clientLevelUp;
+        LevelUp newLevelUp = new LevelUp();
+
+        try {
+            clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
+        } catch (Exception e) {
+            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+            newLevelUp.setMemberDate(psvm.getPurchaseDate());
+            newLevelUp.setPoints(0);
+            newLevelUp.setLevelUpId(levelUpClient.createLevelUp(newLevelUp).getLevelUpId());
+            clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
+        }
 
         int preLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0).getPoints();
-        int postLevelUp;
-        LevelUp clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
-        LevelUp newLevelUp = new LevelUp();
-        if (clientLevelUp == null) {
-            newLevelUp.setMemberDate(LocalDate.now());
-            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
-            newLevelUp.setPoints(invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10);
+        int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
+        int postLevelUp = preLevelUp + levelUp;
 
-            postLevelUp = preLevelUp + levelUpClient.createLevelUp(newLevelUp).getPoints();
-        } else {
-            postLevelUp = preLevelUp + (invoiceTotalPrice.divide(new BigDecimal("50")).setScale(0, BigDecimal.ROUND_FLOOR).intValue() * 10);
-            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
-            newLevelUp.setPoints(postLevelUp);
+        if (postLevelUp != preLevelUp) {
 
-            if (postLevelUp != preLevelUp)
-                levelUpClient.updateLevelUp(newLevelUp);
+            clientLevelUp.setPoints(postLevelUp);
+            levelUpClient.updateLevelUp(clientLevelUp);
         }
 
         prvm.setLvlUpPtsBeforePurchase(preLevelUp);
         prvm.setLvlUpPtsAfterPurchase(postLevelUp);
+        prvm.setMemberSince(clientLevelUp.getMemberDate());
         InvoiceView iv = new InvoiceView();
         Invoice invoice = new Invoice();
 
@@ -355,14 +370,5 @@ public class ServiceLayer {
         prvm.setInvoice(invoice);
 
         return prvm;
-    }
-
-    private ProductView productToProductView(Product product) {
-        ProductView pv = new ProductView();
-        pv.setProductName(product.getProductName());
-        pv.setProductDescription(product.getProductDescription());
-        pv.setListPrice(product.getListPrice());
-
-        return pv;
     }
 }

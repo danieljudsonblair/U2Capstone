@@ -33,9 +33,8 @@ public class InventoryController {
         return dao.getAllInventories();
     }
 
-    @PutMapping("/{id}")
-    public void updateInventory(@PathVariable int id, @RequestBody Inventory inventory) {
-        inventory.setInventoryId(id);
+    @PutMapping
+    public void updateInventory(@RequestBody Inventory inventory) {
         dao.updateInventory(inventory);
     }
 

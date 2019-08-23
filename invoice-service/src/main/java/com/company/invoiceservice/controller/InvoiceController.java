@@ -5,12 +5,14 @@ import com.company.invoiceservice.model.Invoice;
 import com.company.invoiceservice.service.ServiceLayer;
 import com.company.invoiceservice.view.InvoiceViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RefreshScope
 @RequestMapping("/invoices")
 public class InvoiceController {
 
@@ -37,9 +39,8 @@ public class InvoiceController {
         return service.findByCustomerId(id);
     }
 
-    @PutMapping("/{id}")
-    public void updateInvoice(@PathVariable int id, @RequestBody InvoiceViewModel ivm) {
-        ivm.setInvoiceId(id);
+    @PutMapping
+    public void updateInvoice(@RequestBody InvoiceViewModel ivm) {
         service.updateInvoice(ivm);
     }
 

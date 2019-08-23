@@ -19,10 +19,10 @@ public interface LevelUpClient {
     @GetMapping(value = "/levelups")
     public List<LevelUp> getAllLevelUps();
 
-    @GetMapping(value = "/levelups/customer/{customer_id}")
-    public List<LevelUp> getLevelUpByCustomerId(int customer_id);
+    @GetMapping(value = "/levelups/customer/{id}")
+    public List<LevelUp> getLevelUpByCustomerId(@PathVariable int id);
 
-    @PutMapping(value = "/levelups/{levelup_id}")
+    @PutMapping(value = "/levelups")
     public void updateLevelUp(@RequestBody LevelUp levelUp);
 
     @DeleteMapping(value = "/levelups/{levelup_id}")

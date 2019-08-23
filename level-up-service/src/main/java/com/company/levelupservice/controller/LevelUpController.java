@@ -3,6 +3,7 @@ package com.company.levelupservice.controller;
 import com.company.levelupservice.dao.LevelUpDao;
 import com.company.levelupservice.model.LevelUp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RefreshScope
 @RequestMapping("/levelups")
 public class LevelUpController {
 
@@ -23,11 +25,7 @@ public class LevelUpController {
 
     @GetMapping("/{id}")
     public LevelUp getLevelUpById(@PathVariable int id) {
-        try {
-            return dao.get(id);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        return dao.get(id);
     }
 
     @GetMapping
@@ -40,9 +38,8 @@ public class LevelUpController {
         return dao.getByCustomerId(id);
     }
 
-    @PutMapping("/{id}")
-    public void updateLevelUp(@PathVariable int id, @RequestBody LevelUp levelUp) {
-        levelUp.setLevelUpId(id);
+    @PutMapping
+    public void updateLevelUp(@RequestBody LevelUp levelUp) {
         dao.update(levelUp);
     }
 

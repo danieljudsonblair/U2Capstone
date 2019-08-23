@@ -12,7 +12,6 @@ public class Invoice {
     @Min(1)
     private int customerId;
     @NotNull
-    @NotEmpty
     private LocalDate purchaseDate;
 
     public int getInvoiceId() {

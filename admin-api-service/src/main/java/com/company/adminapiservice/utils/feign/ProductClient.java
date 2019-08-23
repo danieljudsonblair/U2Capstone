@@ -19,7 +19,7 @@ public interface ProductClient {
     @GetMapping(value = "/products/{id}")
     public Product getProduct(@PathVariable int id);
 
-    @PutMapping(value = "/products/{product_id}")
+    @PutMapping(value = "/products")
     public void updateProduct(@RequestBody Product product);
 
     @DeleteMapping(value = "/products/{product_id}")

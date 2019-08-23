@@ -19,7 +19,7 @@ public interface CustomerClient {
     @GetMapping(value = "/customers")
     public List<Customer> fetchAllCustomers();
 
-    @PutMapping(value = "/customers/{customer_id}")
+    @PutMapping(value = "/customers")
     public void updateCustomer(@RequestBody Customer customer);
 
     @DeleteMapping(value = "/customers/{customer_id}")

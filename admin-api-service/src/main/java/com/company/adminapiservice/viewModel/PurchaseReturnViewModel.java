@@ -4,6 +4,7 @@ import com.company.adminapiservice.model.Customer;
 import com.company.adminapiservice.model.Invoice;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ public class PurchaseReturnViewModel {
     private List<ProductView> productList;
     private int lvlUpPtsBeforePurchase;
     private int lvlUpPtsAfterPurchase;
+    private LocalDate memberSince;
     private BigDecimal totalPrice;
 
     public Invoice getInvoice() {
@@ -64,6 +66,14 @@ public class PurchaseReturnViewModel {
         this.totalPrice = totalPrice;
     }
 
+    public LocalDate getMemberSince() {
+        return memberSince;
+    }
+
+    public void setMemberSince(LocalDate memberSince) {
+        this.memberSince = memberSince;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,11 +84,12 @@ public class PurchaseReturnViewModel {
                 getInvoice().equals(that.getInvoice()) &&
                 getCustomer().equals(that.getCustomer()) &&
                 getProductList().equals(that.getProductList()) &&
-                getTotalPrice().equals(that.getTotalPrice());
+                getTotalPrice().equals(that.getTotalPrice()) &&
+                getMemberSince().equals(that.getMemberSince());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsBeforePurchase(), getLvlUpPtsAfterPurchase(), getTotalPrice());
+        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsBeforePurchase(), getLvlUpPtsAfterPurchase(), getTotalPrice(), getMemberSince());
     }
 }
