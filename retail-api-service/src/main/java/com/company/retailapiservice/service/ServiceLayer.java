@@ -7,6 +7,7 @@ import com.company.retailapiservice.viewModel.InventoryView;
 import com.company.retailapiservice.viewModel.ProductView;
 import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -73,6 +74,10 @@ public class ServiceLayer {
         return invoiceClient.fetchInvoicesByCustomerId(customerId);
     }
 
+    public PurchaseReturnViewModel savePurchase(PurchaseSendViewModel psvm) {
+        return buildPurchaseReturnViewModel(psvm);
+    }
+
     public Product getProductByProductId(int productId){
         return productClient.getProductById(productId);
     }
@@ -98,9 +103,15 @@ public class ServiceLayer {
         } return invoiceProducts;
 
     }
-
+    @HystrixCommand(fallbackMethod = "reliable")
     public List<LevelUp> getLevelUpPointsByCustomerId(int customerId){
         return levelUpClient.getLevelUpsByCustomerId(customerId);
+    }
+
+    private LevelUp reliable() {
+        LevelUp levelUp = new LevelUp();
+        levelUp.setPoints(-1);
+        return levelUp;
     }
 
     public List<Inventory> getAllInventories(){

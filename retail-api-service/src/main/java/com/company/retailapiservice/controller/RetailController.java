@@ -22,15 +22,15 @@ import java.util.List;
 @RefreshScope
 
 @CacheConfig(cacheNames = {"invoices"})
-    public class RetailController {
-        @Autowired
-        ServiceLayer service;
+public class RetailController {
+    @Autowired
+    ServiceLayer service;
 
-        @CachePut(key = "#results.getId()")
-        @PostMapping(value = "/invoices")
-        public InvoiceView createInvoice(@RequestBody @Valid InvoiceView invoiceView){
-            return service.createInvoice(invoiceView);
-        }
+    @CachePut(key = "#results.getId()")
+    @PostMapping(value = "/purchase")
+    public PurchaseReturnViewModel createPurchase(@RequestBody @Valid PurchaseSendViewModel psvm) {
+        return service.savePurchase(psvm);
+    }
 
 
     @GetMapping(value = "/invoices")
