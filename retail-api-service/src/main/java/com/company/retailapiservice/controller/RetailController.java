@@ -7,6 +7,9 @@ import com.company.retailapiservice.model.LevelUp;
 import com.company.retailapiservice.model.Product;
 import com.company.retailapiservice.service.ServiceLayer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +17,13 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-    @RefreshScope
+@RefreshScope
+@CacheConfig(cacheNames = {"invoices"})
     public class RetailController {
         @Autowired
         ServiceLayer service;
 
+        @CachePut(key = "#results.getId()")
         @PostMapping(value = "/invoices")
         public InvoiceView createInvoice(@RequestBody @Valid InvoiceView invoiceView){
             return service.createInvoice(invoiceView);
@@ -29,6 +34,7 @@ import java.util.List;
             return service.getAllInvoices();
         }
 
+        @Cacheable
         @GetMapping(value = "/invoices/{invoiceId}")
         public InvoiceView fetchInvoicesById(@PathVariable int invoiceId){
             return service.getInvoiceByInvoiceId(invoiceId);
