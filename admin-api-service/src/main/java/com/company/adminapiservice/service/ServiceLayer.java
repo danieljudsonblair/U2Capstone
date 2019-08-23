@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +62,11 @@ public class ServiceLayer {
         return levelUpClient.createLevelUp(levelUp);
     }
 
-    public PurchaseReturnViewModel saveInvoice(PurchaseSendViewModel psvm) {
+    public InvoiceView saveInvoice(InvoiceView invoiceView) {
+        return invoiceClient.createInvoice(invoiceView);
+    }
+
+    public PurchaseReturnViewModel savePurchase(PurchaseSendViewModel psvm) {
         return buildPurchaseReturnViewModel(psvm);
     }
 
@@ -72,6 +77,8 @@ public class ServiceLayer {
     public Inventory fetchInventory(int inventory_id) {
         return inventoryClient.getInventory(inventory_id);
     }
+
+    public InvoiceView fetchInvoice(int invoice_id) { return invoiceClient.getInvoiceById(invoice_id); }
 
     public Product fetchProduct(int product_id) {
         return productClient.getProduct(product_id);
@@ -92,10 +99,6 @@ public class ServiceLayer {
         });
 
         return pList;
-    }
-
-    public InvoiceView fetchInvoice(int invoice_id) {
-        return invoiceClient.getInvoiceById(invoice_id);
     }
 
     public List<Customer> fetchAllCustomers() {
@@ -328,32 +331,30 @@ public class ServiceLayer {
             invoiceTotalPrice = invoiceTotalPrice.add(p.getProductTotal());
         }
         prvm.setTotalPrice(invoiceTotalPrice);
-        LevelUp clientLevelUp;
+        List<LevelUp> clientLevelUpList = new ArrayList<>();
         LevelUp newLevelUp = new LevelUp();
+        LevelUp nextLevelUp = new LevelUp();
+        boolean newCustomer = false;
+        int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
         try {
-            clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
+            clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
         } catch (Exception e) {
-            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
             newLevelUp.setMemberDate(psvm.getPurchaseDate());
-            newLevelUp.setPoints(0);
-            newLevelUp.setLevelUpId(levelUpClient.createLevelUp(newLevelUp).getLevelUpId());
-            clientLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0);
+            newCustomer = true;
+
         }
-
-        int preLevelUp = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId()).get(0).getPoints();
-        int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
-        int postLevelUp = preLevelUp + levelUp;
-
-        if (postLevelUp != preLevelUp) {
-
-            clientLevelUp.setPoints(postLevelUp);
-            levelUpClient.updateLevelUp(clientLevelUp);
+        if (!newCustomer && clientLevelUpList.get(0).getPoints() == -1) {
+            newLevelUp.setMemberDate(LocalDate.of(1999, 9, 9));
+        } else if (!newCustomer && clientLevelUpList.get(0).getPoints() != 1) {
+            newLevelUp.setMemberDate(clientLevelUpList.get(0).getMemberDate());
         }
+        newLevelUp.setPoints(levelUp);
+        newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+        levelUpClient.createLevelUp(newLevelUp);
 
-        prvm.setLvlUpPtsBeforePurchase(preLevelUp);
-        prvm.setLvlUpPtsAfterPurchase(postLevelUp);
-        prvm.setMemberSince(clientLevelUp.getMemberDate());
+        prvm.setLvlUpPtsThisPurchase(levelUp);
+
         InvoiceView iv = new InvoiceView();
         Invoice invoice = new Invoice();
 

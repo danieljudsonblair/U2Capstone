@@ -4,7 +4,6 @@ import com.company.adminapiservice.model.Customer;
 import com.company.adminapiservice.model.Invoice;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,9 +12,7 @@ public class PurchaseReturnViewModel {
     private Invoice invoice;
     private Customer customer;
     private List<ProductView> productList;
-    private int lvlUpPtsBeforePurchase;
-    private int lvlUpPtsAfterPurchase;
-    private LocalDate memberSince;
+    private int lvlUpPtsThisPurchase;
     private BigDecimal totalPrice;
 
     public Invoice getInvoice() {
@@ -42,20 +39,12 @@ public class PurchaseReturnViewModel {
         this.productList = productList;
     }
 
-    public int getLvlUpPtsBeforePurchase() {
-        return lvlUpPtsBeforePurchase;
+    public int getLvlUpPtsThisPurchase() {
+        return lvlUpPtsThisPurchase;
     }
 
-    public void setLvlUpPtsBeforePurchase(int lvlUpPtsBeforePurchase) {
-        this.lvlUpPtsBeforePurchase = lvlUpPtsBeforePurchase;
-    }
-
-    public int getLvlUpPtsAfterPurchase() {
-        return lvlUpPtsAfterPurchase;
-    }
-
-    public void setLvlUpPtsAfterPurchase(int lvlUpPtsAfterPurchase) {
-        this.lvlUpPtsAfterPurchase = lvlUpPtsAfterPurchase;
+    public void setLvlUpPtsThisPurchase(int lvlUpPtsThisPurchase) {
+        this.lvlUpPtsThisPurchase = lvlUpPtsThisPurchase;
     }
 
     public BigDecimal getTotalPrice() {
@@ -66,30 +55,20 @@ public class PurchaseReturnViewModel {
         this.totalPrice = totalPrice;
     }
 
-    public LocalDate getMemberSince() {
-        return memberSince;
-    }
-
-    public void setMemberSince(LocalDate memberSince) {
-        this.memberSince = memberSince;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PurchaseReturnViewModel that = (PurchaseReturnViewModel) o;
-        return getLvlUpPtsBeforePurchase() == that.getLvlUpPtsBeforePurchase() &&
-                getLvlUpPtsAfterPurchase() == that.getLvlUpPtsAfterPurchase() &&
+        return getLvlUpPtsThisPurchase() == that.getLvlUpPtsThisPurchase() &&
                 getInvoice().equals(that.getInvoice()) &&
                 getCustomer().equals(that.getCustomer()) &&
                 getProductList().equals(that.getProductList()) &&
-                getTotalPrice().equals(that.getTotalPrice()) &&
-                getMemberSince().equals(that.getMemberSince());
+                getTotalPrice().equals(that.getTotalPrice());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsBeforePurchase(), getLvlUpPtsAfterPurchase(), getTotalPrice(), getMemberSince());
+        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsThisPurchase(), getTotalPrice());
     }
 }

@@ -264,6 +264,47 @@ public class ServiceLayerTests {
     }
 
     @Test
+    public void saveFetchFetchAllInvoices() {
+        InvoiceItem invoiceItem = new InvoiceItem();
+        invoiceItem.setInvoiceItemId(1);
+        invoiceItem.setInvoiceId(1);
+        invoiceItem.setQuantity(1);
+        invoiceItem.setUnitPrice(new BigDecimal("19.99"));
+        invoiceItem.setInventoryId(1);
+
+        InvoiceItem invoiceItem1 = new InvoiceItem();
+        invoiceItem1.setQuantity(1);
+        invoiceItem1.setUnitPrice(new BigDecimal("19.99"));
+        invoiceItem1.setInventoryId(1);
+
+        List<InvoiceItem> iiList = new ArrayList<>();
+        List<InvoiceItem> iiList1 = new ArrayList<>();
+
+        iiList.add(invoiceItem);
+        iiList1.add(invoiceItem1);
+
+        InvoiceView invoiceView = new InvoiceView();
+        invoiceView.setInvoiceId(1);
+        invoiceView.setCustomerId(1);
+        invoiceView.setPurchaseDate(LocalDate.of(2019,8,8));
+        invoiceView.setInvoiceItemList(iiList);
+
+        InvoiceView invoiceView1 = new InvoiceView();
+
+        invoiceView1.setCustomerId(1);
+        invoiceView1.setPurchaseDate(LocalDate.of(2019,8,8));
+        invoiceView1.setInvoiceItemList(iiList1);
+
+        List<InvoiceView> invoiceViewList = new ArrayList<>();
+        invoiceViewList.add(invoiceView);
+
+        assertEquals(invoiceView, service.fetchAllInvoices().get(0));
+        assertEquals(service.fetchAllInvoices().size(), 1);
+        assertEquals(invoiceView, service.saveInvoice(invoiceView1));
+        assertEquals(invoiceView, service.fetchInvoice(1));
+    }
+
+    @Test
     public void savePurchase() {
         PurchaseSendViewModel psvm = new PurchaseSendViewModel();
         psvm.setCustomerId(1);
@@ -308,11 +349,9 @@ public class ServiceLayerTests {
         prvm.setCustomer(customer);
         prvm.setProductList(pList);
         prvm.setTotalPrice(new BigDecimal("19.99"));
-        prvm.setLvlUpPtsAfterPurchase(10);
-        prvm.setLvlUpPtsBeforePurchase(10);
-        prvm.setMemberSince(LocalDate.of(2019,8,8));
+        prvm.setLvlUpPtsThisPurchase(0);
 
-        PurchaseReturnViewModel prvm1 = service.saveInvoice(psvm);
+        PurchaseReturnViewModel prvm1 = service.savePurchase(psvm);
 
         assertEquals(prvm, prvm1);
     }

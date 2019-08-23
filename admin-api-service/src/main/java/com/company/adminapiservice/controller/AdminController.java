@@ -38,9 +38,9 @@ public class AdminController {
         return service.saveInventory(inventory);
     }
 
-    @PostMapping("/invoices")
+    @PostMapping("/purchase")
     public PurchaseReturnViewModel createInvoice(@RequestBody @Valid PurchaseSendViewModel psvm) {
-        return service.saveInvoice(psvm);
+        return service.savePurchase(psvm);
     }
 
     @GetMapping("/products")
