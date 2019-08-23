@@ -18,13 +18,15 @@ public class ServiceLayer {
     ProductClient productClient;
     InventoryClient inventoryClient;
     LevelUpClient levelUpClient;
+    LevelUpProducer levelUpProducer;
 
     @Autowired
-    public ServiceLayer(InvoiceClient invoiceClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClent){
+    public ServiceLayer(InvoiceClient invoiceClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClient, LevelUpProducer levelUpProducer) {
         this.invoiceClient = invoiceClient;
         this.productClient = productClient;
         this.inventoryClient = inventoryClient;
-        this.levelUpClient = levelUpClent;
+        this.levelUpClient = levelUpClient;
+        this.levelUpProducer = levelUpProducer;
     }
 
     public InvoiceView createInvoice(InvoiceView invoiceView){

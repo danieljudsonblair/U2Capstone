@@ -3,10 +3,11 @@ package com.company.levelupservice.model;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class LevelUp {
+public class LevelUp implements Serializable {
     @Min(0)
     private int levelUpId;
     @Min(1)

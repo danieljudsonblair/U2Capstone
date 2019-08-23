@@ -21,6 +21,7 @@
     </properties>
 
     <modules>
+        <module>levelup-queue-consumer</module>
         <module>admin-api-service</module>
         <module>config-server</module>
         <module>customer-service</module>
