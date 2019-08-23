@@ -45,9 +45,6 @@ public class ServiceLayer {
         return "No " + objectName + " exists @ ID " + id;
     }
 
-    @Autowired
-
-
     public InvoiceView createInvoice(InvoiceView invoiceView){
         return invoiceClient.createInvoice(invoiceView);
     }

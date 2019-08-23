@@ -24,6 +24,7 @@ public class ServiceLayerTest {
     ProductClient productClient;
     InventoryClient inventoryClient;
     LevelUpClient levelUpClient;
+    LevelUpProducer levelUpProducer;
 
     @Before
     public void setUp() throws Exception{
@@ -32,7 +33,7 @@ public class ServiceLayerTest {
         setUpLevelUpServiceClientMock();
         setUpProductServiceClientMock();
 
-        service = new ServiceLayer(invoiceClient,productClient,inventoryClient,levelUpClient);
+        service = new ServiceLayer(invoiceClient,productClient,inventoryClient,levelUpClient, levelUpProducer);
     }
 
     public void setUpInvoiceServiceClientMock(){
@@ -92,8 +93,8 @@ public class ServiceLayerTest {
         iList.add(inventory);
 
 //        doReturn(inventory).when(inventoryClient).createInventory(inventory1);
-        doReturn(inventory).when(inventoryClient).fetchInventoryById(1);
-        doReturn(iList).when(inventoryClient).fetchAllInventories();
+        doReturn(inventory).when(inventoryClient).getInventoryById(1);
+        doReturn(iList).when(inventoryClient).getAllInventorys();
 
     }
 
@@ -116,9 +117,9 @@ public class ServiceLayerTest {
         List<Product> pList = new ArrayList<>();
         pList.add(product);
 
-        doReturn(product).when(productClient).fetchProductsByInvoiceId(1);
-        doReturn(product).when(productClient).fetchProduct(1);
-        doReturn(pList).when(productClient).fetchProductsCurrentlyInInventory();
+        doReturn(product).when(productClient).getProductById(1);
+//        doReturn(product).when(productClient).fetchProduct(1);
+        doReturn(pList).when(productClient).getAllProducts();
     }
 
     public void setUpLevelUpServiceClientMock(){
@@ -141,7 +142,7 @@ public class ServiceLayerTest {
 //        doReturn(levelUp).when(levelUpClient).createLevelUp(levelUp1);
 //        doReturn(levelUp).when(levelUpClient).getLevelUp(1);
 //        doReturn(lUpList).when(levelUpClient).getAllLevelUps();
-        doReturn(lUpList).when(levelUpClient).fetchLevelUpPointByCustomerId(1);
+        doReturn(lUpList).when(levelUpClient).getLevelUpsByCustomerId(1);
 
     }
 
