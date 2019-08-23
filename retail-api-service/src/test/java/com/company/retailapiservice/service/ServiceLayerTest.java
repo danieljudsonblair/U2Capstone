@@ -1,13 +1,12 @@
 package com.company.retailapiservice.service;
 
 import com.company.retailapiservice.model.*;
-import com.company.retailapiservice.util.feign.InventoryServiceClient;
-import com.company.retailapiservice.util.feign.InvoiceServiceClient;
-import com.company.retailapiservice.util.feign.LevelUpServiceClient;
-import com.company.retailapiservice.util.feign.ProductServiceClient;
+import com.company.retailapiservice.util.feign.InventoryClient;
+import com.company.retailapiservice.util.feign.InvoiceClient;
+import com.company.retailapiservice.util.feign.LevelUpClient;
+import com.company.retailapiservice.util.feign.ProductClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,10 +20,10 @@ import static org.mockito.Mockito.mock;
 public class ServiceLayerTest {
 
     ServiceLayer service;
-    InvoiceServiceClient invoiceClient;
-    ProductServiceClient productClient;
-    InventoryServiceClient inventoryClient;
-    LevelUpServiceClient levelUpClient;
+    InvoiceClient invoiceClient;
+    ProductClient productClient;
+    InventoryClient inventoryClient;
+    LevelUpClient levelUpClient;
 
     @Before
     public void setUp() throws Exception{
@@ -37,7 +36,7 @@ public class ServiceLayerTest {
     }
 
     public void setUpInvoiceServiceClientMock(){
-        invoiceClient = mock(InvoiceServiceClient.class);
+        invoiceClient = mock(InvoiceClient.class);
 
         InvoiceItem invoiceItem = new InvoiceItem();
         invoiceItem.setInventoryId(1);
@@ -78,7 +77,7 @@ public class ServiceLayerTest {
     }
 
     public void setUpInventoryServiceClientMock(){
-        inventoryClient = mock(InventoryServiceClient.class);
+        inventoryClient = mock(InventoryClient.class);
 
         Inventory inventory = new Inventory();
         inventory.setInventoryId(1);
@@ -99,7 +98,7 @@ public class ServiceLayerTest {
     }
 
     public void setUpProductServiceClientMock(){
-        productClient = mock(ProductServiceClient.class);
+        productClient = mock(ProductClient.class);
 
         Product product = new Product();
         product.setProductId(1);
@@ -123,7 +122,7 @@ public class ServiceLayerTest {
     }
 
     public void setUpLevelUpServiceClientMock(){
-        levelUpClient = mock(LevelUpServiceClient.class);
+        levelUpClient = mock(LevelUpClient.class);
 
         LevelUp levelUp = new LevelUp();
         levelUp.setLevelUpId(1);

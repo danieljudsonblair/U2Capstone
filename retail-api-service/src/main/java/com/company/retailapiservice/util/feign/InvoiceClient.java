@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @FeignClient(name = "invoice-service")
-public interface InvoiceServiceClient {
+public interface InvoiceClient {
     @PostMapping(value = "/invoices")
     public InvoiceView createInvoice(@RequestBody InvoiceView invoiceView);
 

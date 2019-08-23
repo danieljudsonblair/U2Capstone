@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 @FeignClient(name = "inventory-service")
-public interface CustomerServiceClient {
-//    @GetMapping(value = "/products/inventory")
-//    public List<Inventory> fetchAllInventories();
+public interface InventoryClient {
+    @GetMapping(value = "/inventory")
+    public List<Inventory> fetchAllInventories();
+
+    @GetMapping(value = "/inventory/{inventoryId}")
+    public Inventory fetchInventoryById(@PathVariable int inventoryId);
 }

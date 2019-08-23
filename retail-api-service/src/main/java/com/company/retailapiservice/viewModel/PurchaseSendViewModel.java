@@ -13,6 +13,7 @@ public class PurchaseSendViewModel {
     private Customer customer;
     @NotNull(message = "You must purchase at least one item")
     private List<InventoryView> inventoryList;
+    @NotNull(message = "Your request must contain a field: purchaseDate")
     private LocalDate purchaseDate;
 
     public int getCustomerId() {

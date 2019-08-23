@@ -5,10 +5,10 @@ import com.company.retailapiservice.model.Inventory;
 import com.company.retailapiservice.model.InvoiceItem;
 import com.company.retailapiservice.model.InvoiceView;
 import com.company.retailapiservice.model.Product;
-import com.company.retailapiservice.util.feign.InventoryServiceClient;
-import com.company.retailapiservice.util.feign.InvoiceServiceClient;
-import com.company.retailapiservice.util.feign.LevelUpServiceClient;
-import com.company.retailapiservice.util.feign.ProductServiceClient;
+import com.company.retailapiservice.util.feign.InventoryClient;
+import com.company.retailapiservice.util.feign.InvoiceClient;
+import com.company.retailapiservice.util.feign.LevelUpClient;
+import com.company.retailapiservice.util.feign.ProductClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +17,13 @@ import java.util.List;
 
 @Component
 public class ServiceLayer {
-    InvoiceServiceClient invoiceClient;
-    ProductServiceClient productClient;
-    InventoryServiceClient inventoryClient;
-    LevelUpServiceClient levelUpClient;
+    InvoiceClient invoiceClient;
+    ProductClient productClient;
+    InventoryClient inventoryClient;
+    LevelUpClient levelUpClient;
 
     @Autowired
-    public ServiceLayer(InvoiceServiceClient invoiceClient, ProductServiceClient productClient, InventoryServiceClient inventoryClient, LevelUpServiceClient levelUpClent){
+    public ServiceLayer(InvoiceClient invoiceClient, ProductClient productClient, InventoryClient inventoryClient, LevelUpClient levelUpClent){
         this.invoiceClient = invoiceClient;
         this.productClient = productClient;
         this.inventoryClient = inventoryClient;
