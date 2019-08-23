@@ -2,11 +2,9 @@ package com.company.retailapiservice.util.feign;
 
 import com.company.retailapiservice.model.Invoice;
 import com.company.retailapiservice.model.InvoiceView;
+import com.company.retailapiservice.viewModel.InvoiceViewModel;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +22,10 @@ public interface InvoiceClient {
     @GetMapping(value = "/invoices/customer/{customerId}")
     public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int customerId);
 
+    @PutMapping(value = "/invoices")
+    public void updateInvoice(@RequestBody InvoiceViewModel ivm);
 
+    @DeleteMapping(value = "/invoices/{id}")
+    public void deleteInvoice(@PathVariable int id);
 
 }
