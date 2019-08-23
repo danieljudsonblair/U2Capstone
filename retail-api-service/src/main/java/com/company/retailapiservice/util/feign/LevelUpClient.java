@@ -10,7 +10,7 @@ import java.util.List;
 
 @FeignClient(name = "level-up-service")
 public interface LevelUpClient {
-    @GetMapping("/levleups/{id}")
+    @GetMapping("/levelups/{id}")
     public LevelUp getLevelUpById(@PathVariable int id);
 
     @GetMapping("/levelups")

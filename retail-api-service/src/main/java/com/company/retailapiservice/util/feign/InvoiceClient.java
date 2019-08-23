@@ -22,10 +22,10 @@ public interface InvoiceClient {
     @GetMapping(value = "/invoices/customer/{customerId}")
     public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int customerId);
 
-    @PutMapping
+    @PutMapping(value = "/invoices")
     public void updateInvoice(@RequestBody InvoiceViewModel ivm);
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/invoices/{id}")
     public void deleteInvoice(@PathVariable int id);
 
 }
