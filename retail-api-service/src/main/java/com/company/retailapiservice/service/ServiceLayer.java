@@ -1,5 +1,6 @@
 package com.company.retailapiservice.service;
 
+import com.company.retailapiservice.exception.NotFoundException;
 import com.company.retailapiservice.model.Inventory;
 import com.company.retailapiservice.model.InvoiceItem;
 import com.company.retailapiservice.model.InvoiceView;
@@ -39,7 +40,7 @@ public class ServiceLayer {
 
     public InvoiceView getInvoiceByInvoiceId(int invoiceId){
         if (invoiceClient.fetchInvoicesById(invoiceId) == null)
-            throw new NotFoundExcption();
+            throw new NotFoundException();
     return invoiceClient.fetchInvoicesById(invoiceId);
     }
 
@@ -53,7 +54,7 @@ public class ServiceLayer {
 //
 //        }return customerInvoices;
         if (invoiceClient.fetchInvoicesByCustomerId(customerId) == null)
-            throw new ClassNotFoundException();
+            throw new NotFoundException();
         return invoiceClient.fetchInvoicesByCustomerId(customerId);
     }
 

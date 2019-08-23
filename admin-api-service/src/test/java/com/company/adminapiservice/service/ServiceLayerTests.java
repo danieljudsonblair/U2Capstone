@@ -310,6 +310,7 @@ public class ServiceLayerTests {
         prvm.setTotalPrice(new BigDecimal("19.99"));
         prvm.setLvlUpPtsAfterPurchase(10);
         prvm.setLvlUpPtsBeforePurchase(10);
+        prvm.setMemberSince(LocalDate.of(2019,8,8));
 
         PurchaseReturnViewModel prvm1 = service.saveInvoice(psvm);
 
