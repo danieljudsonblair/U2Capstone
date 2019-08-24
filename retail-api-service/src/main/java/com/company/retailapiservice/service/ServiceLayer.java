@@ -7,7 +7,6 @@ import com.company.retailapiservice.viewModel.InventoryView;
 import com.company.retailapiservice.viewModel.ProductView;
 import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
-//import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,21 +56,11 @@ public class ServiceLayer {
 
     public InvoiceView getInvoiceByInvoiceId(int invoiceId){
         if (invoiceClient.fetchInvoicesById(invoiceId) == null)
-            throw new NotFoundException();
+            throw new NotFoundException(notFound("invoice", invoiceId));
     return invoiceClient.fetchInvoicesById(invoiceId);
     }
 
     public List<InvoiceView> getInvoicesByCustomerId(int customerId) {
-//        List<InvoiceView> customerInvoices = new ArrayList<>();
-//        List<InvoiceView> allInvoices = invoiceClient.fetchAllInvoices();
-//        for (InvoiceView view : allInvoices) {
-//            if (view.getCustomerId() == customerId) {
-//                customerInvoices.add(view);
-//            }
-//
-//        }return customerInvoices;
-        if (invoiceClient.fetchInvoicesByCustomerId(customerId) == null)
-            throw new NotFoundException();
         return invoiceClient.fetchInvoicesByCustomerId(customerId);
     }
 
@@ -85,25 +74,21 @@ public class ServiceLayer {
 
     public List<Product> getProductsInInventory(){
         List<Product> inventoryProducts = new ArrayList<>();
-        List<Inventory> allInventories = inventoryClient.getAllInventorys();
-        for (Inventory inventory: allInventories){
-            if(inventory.getQuantity()>0){
-                inventoryProducts.add(productClient.getProductById(inventory.getProductId()));
-            }
-        }return inventoryProducts;
-
+        inventoryClient.getAllInventorys().stream().forEach(i -> {
+            if (i.getQuantity() > 0)
+                inventoryProducts.add(productClient.getProductById(i.getProductId()));
+        });
+        return inventoryProducts;
     }
 
     public List<Product> getProductsByInvoiceId(int invoiceId){
        List<Product> invoiceProducts = new ArrayList<>();
-        InvoiceView invoiceView = invoiceClient.fetchInvoicesById(invoiceId);
-        List<InvoiceItem> itemList = invoiceView.getInvoiceItemList();
-        for (InvoiceItem invoiceItem: itemList){
-            int productId = inventoryClient.getInventoryById(invoiceItem.getInventoryId()).getProductId();
-            invoiceProducts.add(productClient.getProductById(productId));
-        } return invoiceProducts;
-
+            invoiceClient.fetchInvoicesById(invoiceId).getInvoiceItemList().stream()
+                .forEach(ii -> invoiceProducts.add(productClient.getProductById(
+                                inventoryClient.getInventoryById(ii.getInventoryId()).getProductId())));
+            return invoiceProducts;
     }
+
     @HystrixCommand(fallbackMethod = "reliable")
     public List<LevelUp> getLevelUpPointsByCustomerId(int customerId){
         return levelUpClient.getLevelUpsByCustomerId(customerId);
@@ -184,7 +169,6 @@ public class ServiceLayer {
         prvm.setTotalPrice(invoiceTotalPrice);
         List<LevelUp> clientLevelUpList = new ArrayList<>();
         LevelUp newLevelUp = new LevelUp();
-        LevelUp nextLevelUp = new LevelUp();
         boolean newCustomer = false;
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
@@ -223,5 +207,4 @@ public class ServiceLayer {
 
         return prvm;
     }
-
 }
