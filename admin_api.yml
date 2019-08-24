@@ -9,6 +9,36 @@ servers:
     description: Local dev server
     
 paths:
+  /purchase:
+    post:
+      summary: Create a new purchase
+      description: Creates new purchase object with existing customer Id or new Customer object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchasePost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
   /products:
     post:
       summary: Create a new product
@@ -670,6 +700,60 @@ paths:
 components:
   schemas:
 
+    PurchasePost:
+      type: object
+      properties:
+        customerId:
+          type: number
+        customer:
+          $ref: '#/components/schemas/CustomerPost'
+        purchaseDate:
+          type: string
+        inventoryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseItem'
+      required:
+      - purchaseDate
+      - inventoryList
+      
+    PurchaseResponse:
+      type: object
+      properties:
+        Invoice:
+          type: object
+          properties:
+            invoiceId:
+              type: number
+            customerId:
+              type: number
+        purchaseDate:
+          type: string
+        customer:
+          $ref: '#/components/schemas/CustomerResponse'
+        productList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductView'
+        lvlUpPtsThisPurchase:
+          type: number
+        totalPrice:
+          type: number
+    
+    ProductView:
+      type: object
+      properties:
+        productName:
+          type: string
+        productDescription:
+          type: string
+        quantity:
+          type: number
+        listPrice:
+          type: number
+        productTotal:
+          type: number
+    
     ProductPost:
       type: object
       properties:
@@ -717,6 +801,16 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ProductResponse'
+        
+    PurchaseItem:
+      properties:
+        inventoryId:
+          type: number
+        quantity:
+          type: number
+      required:
+      - inventoryId
+      - quantity
           
     CustomerPost:
       type: object
