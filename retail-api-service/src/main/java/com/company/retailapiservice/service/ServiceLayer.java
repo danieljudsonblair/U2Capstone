@@ -7,6 +7,7 @@ import com.company.retailapiservice.viewModel.InventoryView;
 import com.company.retailapiservice.viewModel.ProductView;
 import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
+//import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -108,10 +109,12 @@ public class ServiceLayer {
         return levelUpClient.getLevelUpsByCustomerId(customerId);
     }
 
-    private LevelUp reliable() {
+    public List<LevelUp> reliable() {
         LevelUp levelUp = new LevelUp();
+        List<LevelUp> levelUpList = new ArrayList<>();
         levelUp.setPoints(-1);
-        return levelUp;
+        levelUpList.add(levelUp);
+        return levelUpList;
     }
 
     public List<Inventory> getAllInventories(){
@@ -186,7 +189,8 @@ public class ServiceLayer {
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
         try {
-            clientLevelUpList = levelUpClient.getLevelUpsByCustomerId(prvm.getCustomer().getCustomerId());
+//            clientLevelUpList = levelUpClient.getLevelUpsByCustomerId(prvm.getCustomer().getCustomerId());
+            clientLevelUpList = getLevelUpPointsByCustomerId(prvm.getCustomer().getCustomerId());
         } catch (Exception e) {
             newLevelUp.setMemberDate(psvm.getPurchaseDate());
             newCustomer = true;

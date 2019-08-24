@@ -1,10 +1,7 @@
 package com.company.retailapiservice.service;
 
 import com.company.retailapiservice.model.*;
-import com.company.retailapiservice.util.feign.InventoryClient;
-import com.company.retailapiservice.util.feign.InvoiceClient;
-import com.company.retailapiservice.util.feign.LevelUpClient;
-import com.company.retailapiservice.util.feign.ProductClient;
+import com.company.retailapiservice.util.feign.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +22,7 @@ public class ServiceLayerTest {
     InventoryClient inventoryClient;
     LevelUpClient levelUpClient;
     LevelUpProducer levelUpProducer;
+    CustomerClient customerClient;
 
     @Before
     public void setUp() throws Exception{
@@ -33,7 +31,7 @@ public class ServiceLayerTest {
         setUpLevelUpServiceClientMock();
         setUpProductServiceClientMock();
 
-        service = new ServiceLayer(invoiceClient,productClient,inventoryClient,levelUpClient, levelUpProducer);
+        service = new ServiceLayer(customerClient, invoiceClient, productClient, inventoryClient,levelUpClient, levelUpProducer);
     }
 
     public void setUpInvoiceServiceClientMock(){
@@ -141,7 +139,7 @@ public class ServiceLayerTest {
 
 //        doReturn(levelUp).when(levelUpClient).createLevelUp(levelUp1);
 //        doReturn(levelUp).when(levelUpClient).getLevelUp(1);
-//        doReturn(lUpList).when(levelUpClient).getAllLevelUps();
+        doReturn(lUpList).when(levelUpClient).getAllLevelUps();
         doReturn(lUpList).when(levelUpClient).getLevelUpsByCustomerId(1);
 
     }

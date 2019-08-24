@@ -30,6 +30,8 @@ public class RetailApiServiceApplication {
 	public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
 		return new Jackson2JsonMessageConverter();
 	}
+
+
 	public static void main(String[] args) {
 		SpringApplication.run(RetailApiServiceApplication.class, args);
 	}

@@ -337,16 +337,16 @@ public class ServiceLayer {
         boolean newCustomer = false;
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
-        try {
+
             clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
-        } catch (Exception e) {
+            if (clientLevelUpList.size() == 0) {
             newLevelUp.setMemberDate(psvm.getPurchaseDate());
             newCustomer = true;
 
         }
         if (!newCustomer && clientLevelUpList.get(0).getPoints() == -1) {
             newLevelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        } else if (!newCustomer && clientLevelUpList.get(0).getPoints() != 1) {
+        } else if (!newCustomer && clientLevelUpList.get(0).getPoints() != -1) {
             newLevelUp.setMemberDate(clientLevelUpList.get(0).getMemberDate());
         }
         newLevelUp.setPoints(levelUp);

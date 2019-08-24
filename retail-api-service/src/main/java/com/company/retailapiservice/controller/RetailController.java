@@ -20,7 +20,6 @@ import java.util.List;
 
 @RestController
 @RefreshScope
-
 @CacheConfig(cacheNames = {"invoices"})
 public class RetailController {
     @Autowired
@@ -65,11 +64,11 @@ public class RetailController {
         return service.getProductsByInvoiceId(invoiceId);
     }
 
+
     @GetMapping(value = "/levelup/customer/{customerId}")
     public List<LevelUp> fetchLevelUpPointByCustomerId(@PathVariable int customerId) {
         return service.getLevelUpPointsByCustomerId(customerId);
     }
-
 
     @GetMapping(value = "/inventory")
     public List<Inventory> fetchAllInventories() {

@@ -66,6 +66,16 @@ public class LevelUp {
     }
 
     @Override
+    public String toString() {
+        return "LevelUp{" +
+                "levelUpId=" + levelUpId +
+                ", customerId=" + customerId +
+                ", points=" + points +
+                ", memberDate=" + memberDate +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
