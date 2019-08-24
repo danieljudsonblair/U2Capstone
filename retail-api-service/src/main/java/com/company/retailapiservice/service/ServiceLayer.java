@@ -9,6 +9,7 @@ import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

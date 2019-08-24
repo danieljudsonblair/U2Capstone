@@ -7,7 +7,9 @@ import com.company.adminapiservice.viewModel.InventoryView;
 import com.company.adminapiservice.viewModel.ProductView;
 import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -88,10 +90,19 @@ public class ServiceLayer {
         return levelUpClient.getLevelUp(levelUp_id);
     }
 
+
+    @HystrixCommand(fallbackMethod = "reliable")
     public List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
         return levelUpClient.getLevelUpByCustomerId(customer_id);
     }
 
+    public List<LevelUp> reliable() {
+        LevelUp levelUp = new LevelUp();
+        List<LevelUp> levelUpList = new ArrayList<>();
+        levelUp.setPoints(-1);
+        levelUpList.add(levelUp);
+        return levelUpList;
+    }
     public List<Product> fetchProductsByInvoiceId(int invoice_id) {
         List<Product> pList = new ArrayList<>();
         invoiceClient.getInvoiceById(invoice_id).getInvoiceItemList().stream().forEach(ii -> {
@@ -338,7 +349,8 @@ public class ServiceLayer {
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
 
-            clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
+//            clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
+        clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
             if (clientLevelUpList.size() == 0) {
             newLevelUp.setMemberDate(psvm.getPurchaseDate());
             newCustomer = true;
