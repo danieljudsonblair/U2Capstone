@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 @Component
 public class ServiceLayer {
@@ -80,29 +81,45 @@ public class ServiceLayer {
         return inventoryClient.getInventory(inventory_id);
     }
 
-    public InvoiceView fetchInvoice(int invoice_id) { return invoiceClient.getInvoiceById(invoice_id); }
+    public InvoiceView fetchInvoice(int invoice_id) {
+        return invoiceClient.getInvoiceById(invoice_id);
+    }
 
     public Product fetchProduct(int product_id) {
         return productClient.getProduct(product_id);
     }
 
+    @HystrixCommand(fallbackMethod = "fallbackLevelUp")
     public LevelUp fetchLevelUp(int levelUp_id) {
         return levelUpClient.getLevelUp(levelUp_id);
     }
 
+    public LevelUp fallbackLevelUp(int levelUp_id) {
+        LevelUp levelUp = new LevelUp();
+        levelUp.setLevelUpId(0);
+        levelUp.setCustomerId(0);
+        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
+        levelUp.setPoints(0);
 
-    @HystrixCommand(fallbackMethod = "reliable")
+        return levelUp;
+    }
+
+    @HystrixCommand(fallbackMethod = "fallbackLevelUpList")
     public List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
         return levelUpClient.getLevelUpByCustomerId(customer_id);
     }
 
-    public List<LevelUp> reliable() {
+    public List<LevelUp> fallbackLevelUpList() {
         LevelUp levelUp = new LevelUp();
         List<LevelUp> levelUpList = new ArrayList<>();
+        levelUp.setLevelUpId(0);
+        levelUp.setCustomerId(0);
+        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
         levelUp.setPoints(-1);
         levelUpList.add(levelUp);
         return levelUpList;
     }
+
     public List<Product> fetchProductsByInvoiceId(int invoice_id) {
         List<Product> pList = new ArrayList<>();
         invoiceClient.getInvoiceById(invoice_id).getInvoiceItemList().stream().forEach(ii -> {
@@ -344,14 +361,13 @@ public class ServiceLayer {
         prvm.setTotalPrice(invoiceTotalPrice);
         List<LevelUp> clientLevelUpList = new ArrayList<>();
         LevelUp newLevelUp = new LevelUp();
-        LevelUp nextLevelUp = new LevelUp();
         boolean newCustomer = false;
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
 
 //            clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
         clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
-            if (clientLevelUpList.size() == 0) {
+        if (clientLevelUpList.size() == 0) {
             newLevelUp.setMemberDate(psvm.getPurchaseDate());
             newCustomer = true;
 
