@@ -109,11 +109,11 @@ public class ServiceLayer {
         return levelUpClient.getLevelUpByCustomerId(customer_id);
     }
 
-    public List<LevelUp> fallbackLevelUpList() {
+    public List<LevelUp> fallbackLevelUpList(int customer_id) {
         LevelUp levelUp = new LevelUp();
         List<LevelUp> levelUpList = new ArrayList<>();
         levelUp.setLevelUpId(0);
-        levelUp.setCustomerId(0);
+        levelUp.setCustomerId(customer_id);
         levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
         levelUp.setPoints(-1);
         levelUpList.add(levelUp);
