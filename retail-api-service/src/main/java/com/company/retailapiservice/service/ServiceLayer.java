@@ -88,22 +88,29 @@ public class ServiceLayer {
 
         return pList;
     }
-/*
- circuit breaker works OK when method is called from controller layer,
- but not when called from levelUpHelper method below
- */
+    /*
+        circuit breaker works OK when method is called from controller layer,
+        but not when called from levelUpHelper method below
+        I only added try-catch block after exhausting attempts to fix circuit breaker
+    */
     @HystrixCommand(fallbackMethod = "otherfallback")
     public int getLevelUpByCustomerId(int customer_id) {
-        int total = 0;
-        List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
-        for (LevelUp lu : levelUpList) {
-            total += lu.getPoints();
+        try {
+            int total = 0;
+            List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
+            for (LevelUp lu : levelUpList) {
+                total += lu.getPoints();
+            }
+            return total;
+        } catch (Exception e) {
+            return -1;
         }
-        return total;
     }
 
-
-    // when levelup service is down, this method IS NOT CALLED and an error is thrown.  I have no idea why
+    /*
+        when levelup service is down, and getLevelUpByCustomerId is called from levelUpHelper method,
+        this method IS NOT CALLED and a timeout exception is thrown.  I have no idea why
+    */
     public int otherfallback(int customer_id) {
         return -1;
     }

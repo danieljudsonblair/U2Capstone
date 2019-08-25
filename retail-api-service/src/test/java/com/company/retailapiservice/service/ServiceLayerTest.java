@@ -240,7 +240,7 @@ public class ServiceLayerTest {
     }
 
     @Test
-    public void getProductByIdGetAllProductsGetProductsInInventory() {
+    public void getProductByIdGetProductsInInventoryGetProdcutsByInvoiceId() {
         Product product = new Product();
         product.setProductId(1);
         product.setProductName("name");
@@ -260,6 +260,54 @@ public class ServiceLayerTest {
         assertEquals(product, service.getProductByProductId(1));
         assertEquals(service.getProductsInInventory().size(), 1);
         assertEquals(service.getProductsInInventory().get(0), product);
+        assertEquals(service.getProductsByInvoiceId(1).size(), 1);
+        assertEquals(service.getProductsByInvoiceId(1).get(0), product);
+    }
+
+    @Test
+    public void getInvoiceGetAllInvoicesGetInvoicesByCustomerId() {
+        InvoiceItem invoiceItem = new InvoiceItem();
+        invoiceItem.setInventoryId(1);
+        invoiceItem.setQuantity(1);
+        invoiceItem.setUnitPrice(new BigDecimal("19.99"));
+
+        InvoiceItem invoiceItem1 = new InvoiceItem();
+        invoiceItem1.setInvoiceItemId(1);
+        invoiceItem1.setInvoiceId(1);
+        invoiceItem1.setInventoryId(1);
+        invoiceItem1.setQuantity(1);
+        invoiceItem1.setUnitPrice(new BigDecimal("19.99"));
+
+        List<InvoiceItem> iiList = new ArrayList<>();
+        iiList.add(invoiceItem);
+
+        List<InvoiceItem> iiList1 = new ArrayList<>();
+        iiList1.add(invoiceItem1);
+
+        InvoiceView invoiceView = new InvoiceView();
+        invoiceView.setInvoiceId(1);
+        invoiceView.setCustomerId(1);
+        invoiceView.setPurchaseDate(LocalDate.of(2019, 8, 8));
+        invoiceView.setInvoiceItemList(iiList1);
+
+        InvoiceView invoiceView1 = new InvoiceView();
+        invoiceView1.setCustomerId(1);
+        invoiceView1.setPurchaseDate(LocalDate.of(2019, 8, 8));
+        invoiceView1.setInvoiceItemList(iiList);
+
+        List<InvoiceView> ivList = new ArrayList<>();
+        ivList.add(invoiceView);
+
+        assertEquals(service.getInvoice(1), invoiceView);
+        assertEquals(service.getAllInvoices().size(), 1);
+        assertEquals(service.getAllInvoices().get(0), invoiceView);
+        assertEquals(service.getInvoicesByCustomerId(1).size(), 1);
+        assertEquals(service.getInvoicesByCustomerId(1).get(0), invoiceView);
+    }
+
+    @Test
+    public void getLevelUpsByCustomerId() {
+        assertEquals(service.getLevelUpByCustomerId(1), 0);
     }
 }
 
