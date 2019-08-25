@@ -23,8 +23,4 @@ public interface ProductClient {
 
     @DeleteMapping(value = "/products/{id}")
     public void deleteProduct(@PathVariable int id);
-
-    @GetMapping(value = "/products/invoice/{invoiceId}")
-    public List<Product> getProductsByInvoiceId(@PathVariable int invoiceId);
-
 }

@@ -2,6 +2,7 @@ package com.company.retailapiservice.controller;
 
 
 import com.company.retailapiservice.model.Inventory;
+import com.company.retailapiservice.model.InvoiceView;
 import com.company.retailapiservice.model.Product;
 import com.company.retailapiservice.service.ServiceLayer;
 import com.company.retailapiservice.viewModel.ProductView;
@@ -10,6 +11,7 @@ import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,9 +26,25 @@ public class RetailController {
     ServiceLayer service;
 
 //    @CachePut(key = "#results.getInvoice().getInvoiceId()")
-    @PostMapping(value = "/purchase")
+    @PostMapping(value = "/invoices")
+    @ResponseStatus(HttpStatus.CREATED)
     public PurchaseReturnViewModel createPurchase(@RequestBody @Valid PurchaseSendViewModel psvm) {
         return service.savePurchase(psvm);
+    }
+
+    @RequestMapping(value = "/invoices/{id}", method = RequestMethod.GET)
+    public InvoiceView getInvoiceById(@PathVariable int id) {
+        return service.getInvoice(id);
+    }
+
+    @RequestMapping(value = "/invoices/customer/{id}", method = RequestMethod.GET)
+    public List<InvoiceView> getInvoicesByCustomerId(@PathVariable int id) {
+        return service.getInvoicesByCustomerId(id);
+    }
+
+    @RequestMapping(value = "/invoices", method = RequestMethod.GET)
+    public List<InvoiceView> getAllInvoices() {
+        return service.getAllInvoices();
     }
 
     @GetMapping(value = "/products/inventory")
@@ -34,23 +52,20 @@ public class RetailController {
         return service.getProductsInInventory();
     }
 
-    @GetMapping(value = "/inventory")
-    public List<Inventory> fetchAllInventories() {
-        return service.getAllInventories();
+    @GetMapping(value = "/products/{id}")
+    public Product fetchProduct(@PathVariable int id) {
+        return service.getProductByProductId(id);
     }
 
-    @GetMapping(value = "/inventory/{inventoryId}")
-    public Inventory fetchInventoryById(@PathVariable int inventoryId) {
-        return service.getInventoryById(inventoryId);
+    @RequestMapping(value = "/products/invoice/{id}", method = RequestMethod.GET)
+    public List<Product> getProductsByInvoiceId(@PathVariable int id) {
+        return service.getProductsByInvoiceId(id);
     }
 
-    @GetMapping(value = "/products/{productId}")
-    public Product fetchProduct(@PathVariable int productId) {
-        return service.getProductByProductId(productId);
+    @RequestMapping(value = "/levelup/customer/{id}", method = RequestMethod.GET)
+    public int getLevelUpPointsByCustomerId(@PathVariable int id) {
+        return service.getLevelUpByCustomerId(id);
     }
 
-    @GetMapping(value = "/products")
-    public List<Product> fetchAllProducts() {
-        return service.getAllProducts();
-    }
+
 }

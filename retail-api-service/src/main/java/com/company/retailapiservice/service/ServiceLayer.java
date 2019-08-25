@@ -44,10 +44,6 @@ public class ServiceLayer {
         return productClient.getProductById(productId);
     }
 
-    public List<Product> getAllProducts() {
-        return productClient.getAllProducts();
-    }
-
     public List<Product> getProductsInInventory(){
         List<Product> inventoryProducts = new ArrayList<>();
         inventoryClient.getAllInventorys().stream().forEach(i -> {
@@ -57,39 +53,59 @@ public class ServiceLayer {
         return inventoryProducts;
     }
 
-    public List<Inventory> getAllInventories(){
-        return inventoryClient.getAllInventorys();
+    public InvoiceView getInvoice(int id) {
+        InvoiceView invoice = invoiceClient.fetchInvoiceById(id);
+        if (invoice == null)
+            throw new NotFoundException(notFound("invoice", id));
+        return invoice;
     }
 
-    public Inventory getInventoryById(int inventoryId){
-        return inventoryClient.getInventoryById(inventoryId);
+    public List<InvoiceView> getAllInvoices() {
+        return invoiceClient.fetchAllInvoices();
     }
 
+    public List<InvoiceView> getInvoicesByCustomerId(int id) {
+        List<InvoiceView> ciList = new ArrayList<>();
+        List<InvoiceView> iList = invoiceClient.fetchAllInvoices();
+        for (InvoiceView iv : iList) {
+            if (iv.getCustomerId() == id) {
+                ciList.add(iv);
+            }
+        }
+        if (ciList.size() == 0)
+            throw new NotFoundException("No invoices could be found for customer id " + id);
+        return ciList;
+    }
+
+    public List<Product> getProductsByInvoiceId(int id) {
+        InvoiceView invoice = invoiceClient.fetchInvoiceById(id);
+        List<Product> pList = new ArrayList<>();
+        if (invoice == null)
+            throw new NotFoundException(notFound("invoice", id));
+        invoice.getInvoiceItemList().stream().forEach(invoiceItem ->
+            pList.add(productClient.getProductById(
+                        inventoryClient.getInventoryById(invoiceItem.getInventoryId()).getProductId())));
+
+        return pList;
+    }
+/*
+ circuit breaker works OK when method is called from controller layer,
+ but not when called from levelUpHelper method below
+ */
     @HystrixCommand(fallbackMethod = "otherfallback")
-    private List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
-//        return levelUpClient.getLevelUpsByCustomerId(customer_id);
-        LevelUp levelUp = new LevelUp();
-        List<LevelUp> levelUpList = new ArrayList<>();
-        levelUp.setLevelUpId(0);
-        levelUp.setCustomerId(customer_id);
-        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        levelUp.setPoints(-1);
-        levelUpList.add(levelUp);
-        try { return levelUpClient.getLevelUpsByCustomerId(customer_id); }
-        catch (Exception e) {
-            return levelUpList;
-      }
+    public int getLevelUpByCustomerId(int customer_id) {
+        int total = 0;
+        List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
+        for (LevelUp lu : levelUpList) {
+            total += lu.getPoints();
+        }
+        return total;
     }
+
+
     // when levelup service is down, this method IS NOT CALLED and an error is thrown.  I have no idea why
-    private List<LevelUp> otherfallback(int customer_id) {
-        LevelUp levelUp = new LevelUp();
-        List<LevelUp> levelUpList = new ArrayList<>();
-        levelUp.setLevelUpId(0);
-        levelUp.setCustomerId(customer_id);
-        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        levelUp.setPoints(-1);
-        levelUpList.add(levelUp);
-        return levelUpList;
+    public int otherfallback(int customer_id) {
+        return -1;
     }
 
     private PurchaseReturnViewModel buildPurchaseReturnViewModel(PurchaseSendViewModel psvm) {
@@ -168,15 +184,11 @@ public class ServiceLayer {
         prvm.setTotalPrice(invoiceTotalPrice);
 
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
-
-        clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
-        if (clientLevelUpList.get(0).getPoints() == -1) {
+        int clientLevelUp = getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
+        if (clientLevelUp == -1) {
             prvm.setTotalLvlUpPts("not available");
         } else {
-            Integer totalPts = 0;
-            for (LevelUp lu : clientLevelUpList) {
-                totalPts += lu.getPoints();
-            }
+            Integer totalPts = levelUp + clientLevelUp;
 
             prvm.setTotalLvlUpPts(totalPts.toString());
 

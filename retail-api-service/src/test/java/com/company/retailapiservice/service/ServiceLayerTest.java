@@ -105,7 +105,7 @@ public class ServiceLayerTest {
         ivList.add(invoiceView);
 
         doReturn(invoiceView).when(invoiceClient).createInvoice(invoiceView1);
-        doReturn(invoiceView).when(invoiceClient).fetchInvoicesById(1);
+        doReturn(invoiceView).when(invoiceClient).fetchInvoiceById(1);
         doReturn(ivList).when(invoiceClient).fetchAllInvoices();
     }
 
@@ -260,27 +260,6 @@ public class ServiceLayerTest {
         assertEquals(product, service.getProductByProductId(1));
         assertEquals(service.getProductsInInventory().size(), 1);
         assertEquals(service.getProductsInInventory().get(0), product);
-        assertEquals(service.getAllProducts().size(), 1);
-        assertEquals(service.getAllProducts().get(0), product);
-    }
-
-    @Test
-    public void getInventoryByIdGetAllInventories() {
-        Inventory inventory = new Inventory();
-        inventory.setInventoryId(1);
-        inventory.setProductId(1);
-        inventory.setQuantity(10);
-
-        Inventory inventory1 = new Inventory();
-        inventory1.setProductId(1);
-        inventory1.setQuantity(10);
-
-        List<Inventory> iList = new ArrayList<>();
-        iList.add(inventory);
-
-        assertEquals(service.getInventoryById(1), inventory);
-        assertEquals(service.getAllInventories().size(), 1);
-        assertEquals(service.getAllInventories().get(0), inventory);
     }
 }
 
