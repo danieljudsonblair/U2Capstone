@@ -28,7 +28,7 @@ public class AdminController {
 
     @PostMapping("/invoices")
     @ResponseStatus(HttpStatus.CREATED)
-    public InvoiceView saveInvoice(InvoiceView iv) {
+    public InvoiceView saveInvoice(InvoiceView iv, Principal principal) {
         return service.saveInvoice(iv);
     }
 
@@ -63,7 +63,7 @@ public class AdminController {
     }
 
     @GetMapping("/products/invoice/{id}")
-    public List<Product> getProductsByInvoiceId(@PathVariable int id){
+    public List<Product> getProductsByInvoiceId(@PathVariable int id, Principal principal){
         return service.fetchProductsByInvoiceId(id);
     }
 
@@ -83,7 +83,7 @@ public class AdminController {
     }
 
     @GetMapping(value = "/invoices/customer/{customerId}")
-    public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int customerId) {
+    public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int customerId, Principal principal) {
         return service.getInvoicesByCustomerId(customerId);
     }
 
