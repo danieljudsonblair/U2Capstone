@@ -13,6 +13,7 @@ public class PurchaseReturnViewModel {
     private Customer customer;
     private List<ProductView> productList;
     private int lvlUpPtsThisPurchase;
+    private String totalLvlUpPts;
     private BigDecimal totalPrice;
 
     public Invoice getInvoice() {
@@ -47,6 +48,14 @@ public class PurchaseReturnViewModel {
         this.lvlUpPtsThisPurchase = lvlUpPtsThisPurchase;
     }
 
+    public String getTotalLvlUpPts() {
+        return totalLvlUpPts;
+    }
+
+    public void setTotalLvlUpPts(String totalLvlUpPts) {
+        this.totalLvlUpPts = totalLvlUpPts;
+    }
+
     public BigDecimal getTotalPrice() {
         return totalPrice;
     }
@@ -64,11 +73,12 @@ public class PurchaseReturnViewModel {
                 getInvoice().equals(that.getInvoice()) &&
                 getCustomer().equals(that.getCustomer()) &&
                 getProductList().equals(that.getProductList()) &&
+                getTotalLvlUpPts().equals(that.getTotalLvlUpPts()) &&
                 getTotalPrice().equals(that.getTotalPrice());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsThisPurchase(), getTotalPrice());
+        return Objects.hash(getInvoice(), getCustomer(), getProductList(), getLvlUpPtsThisPurchase(), getTotalLvlUpPts(), getTotalPrice());
     }
 }

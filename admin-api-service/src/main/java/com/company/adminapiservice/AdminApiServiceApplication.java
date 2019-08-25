@@ -11,7 +11,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableDiscoveryClient
-@EnableCircuitBreaker
 public class AdminApiServiceApplication {
 
 	public static void main(String[] args) {

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class ProductView {
+
     private String productName;
     private String productDescription;
     private BigDecimal quantity;

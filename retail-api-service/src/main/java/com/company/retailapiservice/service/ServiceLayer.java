@@ -3,13 +3,9 @@ package com.company.retailapiservice.service;
 import com.company.retailapiservice.exception.NotFoundException;
 import com.company.retailapiservice.model.*;
 import com.company.retailapiservice.util.feign.*;
-import com.company.retailapiservice.viewModel.InventoryView;
-import com.company.retailapiservice.viewModel.ProductView;
-import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
-import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
+import com.company.retailapiservice.viewModel.*;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -36,33 +32,8 @@ public class ServiceLayer {
         this.levelUpProducer = levelUpProducer;
     }
 
-    private BigDecimal min = new BigDecimal("0");
-    private BigDecimal max = new BigDecimal("99999.99");
-
-    private String emptyField(String fieldName) {
-        return "Field name " + fieldName + " cannot be an empty string";
-    }
-
     private String notFound(String objectName, int id) {
         return "No " + objectName + " exists @ ID " + id;
-    }
-
-    public InvoiceView createInvoice(InvoiceView invoiceView){
-        return invoiceClient.createInvoice(invoiceView);
-    }
-
-    public List<InvoiceView> getAllInvoices(){
-        return invoiceClient.fetchAllInvoices();
-    }
-
-    public InvoiceView getInvoiceByInvoiceId(int invoiceId){
-        if (invoiceClient.fetchInvoicesById(invoiceId) == null)
-            throw new NotFoundException(notFound("invoice", invoiceId));
-    return invoiceClient.fetchInvoicesById(invoiceId);
-    }
-
-    public List<InvoiceView> getInvoicesByCustomerId(int customerId) {
-        return invoiceClient.fetchInvoicesByCustomerId(customerId);
     }
 
     public PurchaseReturnViewModel savePurchase(PurchaseSendViewModel psvm) {
@@ -71,6 +42,10 @@ public class ServiceLayer {
 
     public Product getProductByProductId(int productId){
         return productClient.getProductById(productId);
+    }
+
+    public List<Product> getAllProducts() {
+        return productClient.getAllProducts();
     }
 
     public List<Product> getProductsInInventory(){
@@ -82,27 +57,6 @@ public class ServiceLayer {
         return inventoryProducts;
     }
 
-    public List<Product> getProductsByInvoiceId(int invoiceId){
-       List<Product> invoiceProducts = new ArrayList<>();
-            invoiceClient.fetchInvoicesById(invoiceId).getInvoiceItemList().stream()
-                .forEach(ii -> invoiceProducts.add(productClient.getProductById(
-                                inventoryClient.getInventoryById(ii.getInventoryId()).getProductId())));
-            return invoiceProducts;
-    }
-
-    @HystrixCommand(fallbackMethod = "reliable")
-    public List<LevelUp> getLevelUpPointsByCustomerId(int customerId){
-        return levelUpClient.getLevelUpsByCustomerId(customerId);
-    }
-
-    public List<LevelUp> reliable() {
-        LevelUp levelUp = new LevelUp();
-        List<LevelUp> levelUpList = new ArrayList<>();
-        levelUp.setPoints(-1);
-        levelUpList.add(levelUp);
-        return levelUpList;
-    }
-
     public List<Inventory> getAllInventories(){
         return inventoryClient.getAllInventorys();
     }
@@ -111,17 +65,46 @@ public class ServiceLayer {
         return inventoryClient.getInventoryById(inventoryId);
     }
 
+    @HystrixCommand(fallbackMethod = "otherfallback")
+    private List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
+//        return levelUpClient.getLevelUpsByCustomerId(customer_id);
+        LevelUp levelUp = new LevelUp();
+        List<LevelUp> levelUpList = new ArrayList<>();
+        levelUp.setLevelUpId(0);
+        levelUp.setCustomerId(customer_id);
+        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
+        levelUp.setPoints(-1);
+        levelUpList.add(levelUp);
+        try { return levelUpClient.getLevelUpsByCustomerId(customer_id); }
+        catch (Exception e) {
+            return levelUpList;
+      }
+    }
+    // when levelup service is down, this method IS NOT CALLED and an error is thrown.  I have no idea why
+    private List<LevelUp> otherfallback(int customer_id) {
+        LevelUp levelUp = new LevelUp();
+        List<LevelUp> levelUpList = new ArrayList<>();
+        levelUp.setLevelUpId(0);
+        levelUp.setCustomerId(customer_id);
+        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
+        levelUp.setPoints(-1);
+        levelUpList.add(levelUp);
+        return levelUpList;
+    }
+
     private PurchaseReturnViewModel buildPurchaseReturnViewModel(PurchaseSendViewModel psvm) {
         PurchaseReturnViewModel prvm = new PurchaseReturnViewModel();
-        List<ProductView> pvList = new ArrayList<>();
         List<InvoiceItem> iiList = new ArrayList<>();
-        List<InventoryView> ivList;
-        BigDecimal invoiceTotalPrice = new BigDecimal("0");
-        Inventory clientInventory;
-        Product clientProduct;
-        Inventory updatedInventory = new Inventory();
 
+        customerHelper(psvm, prvm);
+        productViewAndInvoiceItemHelper(psvm, prvm, iiList);
+        levelUpHelper(prvm, psvm);
+        invoiceHelper(psvm, prvm, iiList);
 
+        return prvm;
+    }
+
+    private void customerHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm) {
         if (psvm.getCustomer() == null) {
             Customer customer = customerClient.getCustomer(psvm.getCustomerId());
             if (customer == null)
@@ -130,8 +113,16 @@ public class ServiceLayer {
         } else if (psvm.getCustomer() != null && psvm.getCustomerId() == 0) {
             prvm.setCustomer(customerClient.createCustomer(psvm.getCustomer()));
         }
+    }
 
+    private void productViewAndInvoiceItemHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm, List<InvoiceItem> iiList) {
+        List<InventoryView> ivList;
         ivList = psvm.getInventoryList();
+        Inventory clientInventory;
+        Product clientProduct;
+        Inventory updatedInventory = new Inventory();
+        List<ProductView> pvList = new ArrayList<>();
+
         for (InventoryView i : ivList) {
             InvoiceItem ii = new InvoiceItem();
             ProductView pv = new ProductView();
@@ -162,36 +153,43 @@ public class ServiceLayer {
 
             pvList.add(pv);
         }
-        prvm.setProductList(pvList);
 
-        for (ProductView p : pvList) {
+        prvm.setProductList(pvList);
+    }
+
+    private void levelUpHelper(PurchaseReturnViewModel prvm, PurchaseSendViewModel psvm) {
+        List<LevelUp> clientLevelUpList = new ArrayList<>();
+        BigDecimal invoiceTotalPrice = new BigDecimal("0");
+        LevelUp newLevelUp = new LevelUp();
+
+        for (ProductView p : prvm.getProductList()) {
             invoiceTotalPrice = invoiceTotalPrice.add(p.getProductTotal());
         }
         prvm.setTotalPrice(invoiceTotalPrice);
-        List<LevelUp> clientLevelUpList = new ArrayList<>();
-        LevelUp newLevelUp = new LevelUp();
-        boolean newCustomer = false;
+
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
-        try {
-//            clientLevelUpList = levelUpClient.getLevelUpsByCustomerId(prvm.getCustomer().getCustomerId());
-            clientLevelUpList = getLevelUpPointsByCustomerId(prvm.getCustomer().getCustomerId());
-        } catch (Exception e) {
-            newLevelUp.setMemberDate(psvm.getPurchaseDate());
-            newCustomer = true;
+        clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
+        if (clientLevelUpList.get(0).getPoints() == -1) {
+            prvm.setTotalLvlUpPts("not available");
+        } else {
+            Integer totalPts = 0;
+            for (LevelUp lu : clientLevelUpList) {
+                totalPts += lu.getPoints();
+            }
 
+            prvm.setTotalLvlUpPts(totalPts.toString());
+
+            newLevelUp.setPoints(levelUp);
+            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+            newLevelUp.setMemberDate(psvm.getPurchaseDate());
+            levelUpProducer.createLevelUp(newLevelUp);
         }
-        if (!newCustomer && clientLevelUpList.get(0).getPoints() == -1) {
-            newLevelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        } else if (!newCustomer && clientLevelUpList.get(0).getPoints() != 1) {
-            newLevelUp.setMemberDate(clientLevelUpList.get(0).getMemberDate());
-        }
-        newLevelUp.setPoints(levelUp);
-        newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
-        levelUpProducer.createLevelUp(newLevelUp);
 
         prvm.setLvlUpPtsThisPurchase(levelUp);
+    }
 
+    private void invoiceHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm, List<InvoiceItem> iiList) {
         InvoiceView iv = new InvoiceView();
         Invoice invoice = new Invoice();
 
@@ -205,7 +203,5 @@ public class ServiceLayer {
         invoice.setInvoiceId(iv.getInvoiceId());
 
         prvm.setInvoice(invoice);
-
-        return prvm;
     }
 }

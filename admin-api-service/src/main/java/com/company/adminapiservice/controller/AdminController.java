@@ -19,6 +19,11 @@ public class AdminController {
     @Autowired
     ServiceLayer service;
 
+    @PostMapping("/purchase")
+    public PurchaseReturnViewModel createInvoice(@RequestBody @Valid PurchaseSendViewModel psvm, Principal principal) {
+        return service.savePurchase(psvm);
+    }
+
     @PostMapping("/products")
     public Product createProduct(@RequestBody @Valid Product product, Principal principal) {
         return service.saveProduct(product);
@@ -39,10 +44,6 @@ public class AdminController {
         return service.saveInventory(inventory);
     }
 
-    @PostMapping("/purchase")
-    public PurchaseReturnViewModel createInvoice(@RequestBody @Valid PurchaseSendViewModel psvm, Principal principal) {
-        return service.savePurchase(psvm);
-    }
 
     @GetMapping("/products")
     public List<Product> getAllProducts(Principal principal) {
@@ -67,6 +68,11 @@ public class AdminController {
     @GetMapping("/invoices")
     public List<InvoiceView> getAllInvoices(Principal principal) {
         return service.fetchAllInvoices();
+    }
+
+    @GetMapping(value = "/invoices/customer/{customerId}")
+    public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int customerId) {
+        return service.getInvoicesByCustomerId(customerId);
     }
 
     @GetMapping("/customers")

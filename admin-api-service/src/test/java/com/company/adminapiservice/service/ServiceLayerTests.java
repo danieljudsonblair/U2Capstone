@@ -310,7 +310,7 @@ public class ServiceLayerTests {
         psvm.setCustomerId(1);
         psvm.setPurchaseDate(LocalDate.of(2019,8,8));
 
-        InventoryView inventory = new Inventory();
+        InventoryView inventory = new InventoryView();
         inventory.setInventoryId(1);
         inventory.setQuantity(1);
 
@@ -350,6 +350,7 @@ public class ServiceLayerTests {
         prvm.setProductList(pList);
         prvm.setTotalPrice(new BigDecimal("19.99"));
         prvm.setLvlUpPtsThisPurchase(0);
+        prvm.setTotalLvlUpPts("10");
 
         PurchaseReturnViewModel prvm1 = service.savePurchase(psvm);
 

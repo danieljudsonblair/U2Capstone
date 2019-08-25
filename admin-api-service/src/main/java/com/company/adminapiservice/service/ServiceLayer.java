@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 @Component
+@EnableCircuitBreaker
 public class ServiceLayer {
 
     CustomerClient customerClient;
@@ -84,32 +85,48 @@ public class ServiceLayer {
     public InvoiceView fetchInvoice(int invoice_id) {
         return invoiceClient.getInvoiceById(invoice_id);
     }
+    public List<InvoiceView> getInvoicesByCustomerId(int customerId) {
+        return invoiceClient.fetchInvoicesByCustomerId(customerId);
+    }
 
     public Product fetchProduct(int product_id) {
         return productClient.getProduct(product_id);
     }
 
+
+    // this circuit breaker method works ok
     @HystrixCommand(fallbackMethod = "fallbackLevelUp")
     public LevelUp fetchLevelUp(int levelUp_id) {
         return levelUpClient.getLevelUp(levelUp_id);
     }
-
+    // when levelup service is down, fallbackLevelUp method below is called
     public LevelUp fallbackLevelUp(int levelUp_id) {
         LevelUp levelUp = new LevelUp();
-        levelUp.setLevelUpId(0);
+        levelUp.setLevelUpId(levelUp_id);
         levelUp.setCustomerId(0);
         levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        levelUp.setPoints(0);
-
+        levelUp.setPoints(-1);
         return levelUp;
     }
 
-    @HystrixCommand(fallbackMethod = "fallbackLevelUpList")
+    // this circuit breaker method never calls the fallback method, so I'm commenting out the original body and replacing it with a try-catch block
+    @HystrixCommand(fallbackMethod = "otherfallback")
     public List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
-        return levelUpClient.getLevelUpByCustomerId(customer_id);
+//        return levelUpClient.getLevelUpByCustomerId(customer_id);  <- this is the original body
+        LevelUp levelUp = new LevelUp();
+        List<LevelUp> levelUpList = new ArrayList<>();
+        levelUp.setLevelUpId(0);
+        levelUp.setCustomerId(customer_id);
+        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
+        levelUp.setPoints(-1);
+        levelUpList.add(levelUp);
+        try { return levelUpClient.getLevelUpByCustomerId(customer_id); }
+        catch (Exception e) {
+            return levelUpList;
+        }
     }
-
-    public List<LevelUp> fallbackLevelUpList(int customer_id) {
+    // when levelup service is down, this method IS NOT CALLED and an error is thrown.  I have no idea why
+    public List<LevelUp> otherfallback(int customer_id) {
         LevelUp levelUp = new LevelUp();
         List<LevelUp> levelUpList = new ArrayList<>();
         levelUp.setLevelUpId(0);
@@ -364,22 +381,22 @@ public class ServiceLayer {
         boolean newCustomer = false;
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
-
-//            clientLevelUpList = levelUpClient.getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
         clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
-        if (clientLevelUpList.size() == 0) {
-            newLevelUp.setMemberDate(psvm.getPurchaseDate());
-            newCustomer = true;
+        if (clientLevelUpList.get(0).getPoints() == -1) {
+            prvm.setTotalLvlUpPts("not available");
+        } else {
+            Integer totalPts = 0;
+            for (LevelUp lu : clientLevelUpList) {
+                totalPts += lu.getPoints();
+            }
 
+            prvm.setTotalLvlUpPts(totalPts.toString());
+
+            newLevelUp.setPoints(levelUp);
+            newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
+            newLevelUp.setMemberDate(psvm.getPurchaseDate());
+            levelUpClient.createLevelUp(newLevelUp);
         }
-        if (!newCustomer && clientLevelUpList.get(0).getPoints() == -1) {
-            newLevelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        } else if (!newCustomer && clientLevelUpList.get(0).getPoints() != -1) {
-            newLevelUp.setMemberDate(clientLevelUpList.get(0).getMemberDate());
-        }
-        newLevelUp.setPoints(levelUp);
-        newLevelUp.setCustomerId(prvm.getCustomer().getCustomerId());
-        levelUpClient.createLevelUp(newLevelUp);
 
         prvm.setLvlUpPtsThisPurchase(levelUp);
 

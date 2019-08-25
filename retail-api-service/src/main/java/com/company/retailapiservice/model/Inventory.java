@@ -1,23 +1,13 @@
 package com.company.retailapiservice.model;
 
+import com.company.retailapiservice.viewModel.InventoryView;
+
 import javax.validation.constraints.Min;
 import java.util.Objects;
 
-public class Inventory {
-    @Min(0)
-    private int inventoryId;
-    @Min(1)
+public class Inventory extends InventoryView {
+
     private int productId;
-    @Min(0)
-    private int quantity;
-
-    public int getInventoryId() {
-        return inventoryId;
-    }
-
-    public void setInventoryId(int inventoryId) {
-        this.inventoryId = inventoryId;
-    }
 
     public int getProductId() {
         return productId;
@@ -27,26 +17,17 @@ public class Inventory {
         this.productId = productId;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Inventory inventory = (Inventory) o;
-        return inventoryId == inventory.inventoryId &&
-                productId == inventory.productId &&
-                quantity == inventory.quantity;
+        return getProductId() == inventory.getProductId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inventoryId, productId, quantity);
+        return Objects.hash(super.hashCode(), getProductId());
     }
 }

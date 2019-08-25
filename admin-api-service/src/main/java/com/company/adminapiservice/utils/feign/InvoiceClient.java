@@ -19,6 +19,9 @@ public interface InvoiceClient {
     @GetMapping(value = "/invoices/{invoice_id}")
     public InvoiceView getInvoiceById(@PathVariable int invoice_id);
 
+    @GetMapping(value = "/invoices/customer/{id}")
+    public List<InvoiceView> fetchInvoicesByCustomerId(@PathVariable int id);
+
     @PutMapping(value = "/invoices")
     public void updateInvoice(@RequestBody InvoiceView iv);
 
