@@ -6,6 +6,7 @@ import com.company.adminapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.adminapiservice.viewModel.PurchaseSendViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,26 +21,37 @@ public class AdminController {
     ServiceLayer service;
 
     @PostMapping("/purchase")
+    @ResponseStatus(HttpStatus.CREATED)
     public PurchaseReturnViewModel createPurchase(@RequestBody @Valid PurchaseSendViewModel psvm, Principal principal) {
         return service.savePurchase(psvm);
     }
 
+    @PostMapping("/invoices")
+    @ResponseStatus(HttpStatus.CREATED)
+    public InvoiceView saveInvoice(InvoiceView iv) {
+        return service.saveInvoice(iv);
+    }
+
     @PostMapping("/products")
+    @ResponseStatus(HttpStatus.CREATED)
     public Product createProduct(@RequestBody @Valid Product product, Principal principal) {
         return service.saveProduct(product);
     }
 
     @PostMapping("/customers")
+    @ResponseStatus(HttpStatus.CREATED)
     public Customer createCustomer(@RequestBody @Valid Customer customer, Principal principal) {
         return service.saveCustomer(customer);
     }
 
     @PostMapping("/levelup")
+    @ResponseStatus(HttpStatus.CREATED)
     public LevelUp createLevelUp(@RequestBody @Valid LevelUp levelup, Principal principal) {
         return service.saveLevelUp(levelup);
     }
 
     @PostMapping("/inventory")
+    @ResponseStatus(HttpStatus.CREATED)
     public Inventory createInventory(@RequestBody @Valid Inventory inventory, Principal principal) {
         return service.saveInventory(inventory);
     }
@@ -117,50 +129,59 @@ public class AdminController {
     }
 
     @PutMapping("/customers/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCustomer(@PathVariable int id, @RequestBody Customer customer, Principal principal) {
         customer.setCustomerId(id);
         service.updateCustomer(customer);
     }
 
     @PutMapping("/invoices/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateInvoice(@PathVariable int id, @RequestBody InvoiceView invoice, Principal principal) {
         invoice.setInvoiceId(id);
         service.updateInvoice(invoice);
     }
 
     @PutMapping("/levelups/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateLevelUp(@PathVariable int id, @RequestBody LevelUp levelup, Principal principal) {
         levelup.setLevelUpId(id);
         service.updateLevelUp(levelup);
     }
 
     @PutMapping("/inventory/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateInventory(@PathVariable int id, @RequestBody Inventory inventory, Principal principal) {
         inventory.setInventoryId(id);
         service.updateInventory(inventory);
     }
 
     @DeleteMapping("/products/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable int id, Principal principal) {
         service.deleteProduct(id);
     }
 
     @DeleteMapping("/customers/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable int id, Principal principal) {
         service.deleteCustomer(id);
     }
 
     @DeleteMapping("/invoices/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteInvoice(@PathVariable int id, Principal principal) {
         service.deleteInvoice(id);
     }
 
     @DeleteMapping("/inventory/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteInventory(@PathVariable int id, Principal principal) {
         service.deleteInventory(id);
     }
 
     @DeleteMapping("/levelup/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLevelUp(@PathVariable int id, Principal principal) {
         service.deleteLevelUp(id);
     }

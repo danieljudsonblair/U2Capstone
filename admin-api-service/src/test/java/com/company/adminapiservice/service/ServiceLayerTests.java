@@ -299,6 +299,7 @@ public class ServiceLayerTests {
 
         assertEquals(invoiceView, service.fetchAllInvoices().get(0));
         assertEquals(service.fetchAllInvoices().size(), 1);
+        assertEquals(service.fetchAllInvoices().get(0), invoiceView);
         assertEquals(invoiceView, service.saveInvoice(invoiceView1));
         assertEquals(invoiceView, service.fetchInvoice(1));
     }
