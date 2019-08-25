@@ -20,7 +20,7 @@ public class AdminController {
     ServiceLayer service;
 
     @PostMapping("/purchase")
-    public PurchaseReturnViewModel createInvoice(@RequestBody @Valid PurchaseSendViewModel psvm, Principal principal) {
+    public PurchaseReturnViewModel createPurchase(@RequestBody @Valid PurchaseSendViewModel psvm, Principal principal) {
         return service.savePurchase(psvm);
     }
 

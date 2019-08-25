@@ -109,32 +109,31 @@ public class ServiceLayer {
         return levelUp;
     }
 
-    // this circuit breaker method never calls the fallback method, so I'm commenting out the original body and replacing it with a try-catch block
+    /*
+        circuit breaker works OK when method is called from controller layer,
+        but not when called from levelUpHelper method below
+        I only added try-catch block after exhausting attempts to fix circuit breaker
+    */
     @HystrixCommand(fallbackMethod = "otherfallback")
-    public List<LevelUp> fetchLevelUpByCustomerId(int customer_id) {
-//        return levelUpClient.getLevelUpByCustomerId(customer_id);  <- this is the original body
-        LevelUp levelUp = new LevelUp();
-        List<LevelUp> levelUpList = new ArrayList<>();
-        levelUp.setLevelUpId(0);
-        levelUp.setCustomerId(customer_id);
-        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        levelUp.setPoints(-1);
-        levelUpList.add(levelUp);
-        try { return levelUpClient.getLevelUpByCustomerId(customer_id); }
-        catch (Exception e) {
-            return levelUpList;
+    public int getLevelUpByCustomerId(int customer_id) {
+        try {
+            int total = 0;
+            List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
+            for (LevelUp lu : levelUpList) {
+                total += lu.getPoints();
+            }
+            return total;
+        } catch (Exception e) {
+            return -1;
         }
     }
-    // when levelup service is down, this method IS NOT CALLED and an error is thrown.  I have no idea why
-    public List<LevelUp> otherfallback(int customer_id) {
-        LevelUp levelUp = new LevelUp();
-        List<LevelUp> levelUpList = new ArrayList<>();
-        levelUp.setLevelUpId(0);
-        levelUp.setCustomerId(customer_id);
-        levelUp.setMemberDate(LocalDate.of(1999, 9, 9));
-        levelUp.setPoints(-1);
-        levelUpList.add(levelUp);
-        return levelUpList;
+
+    /*
+        when levelup service is down, and getLevelUpByCustomerId is called from levelUpHelper method,
+        this method IS NOT CALLED and a timeout exception is thrown.  I have no idea why
+    */
+    public int otherfallback(int customer_id) {
+        return -1;
     }
 
     public List<Product> fetchProductsByInvoiceId(int invoice_id) {
@@ -395,15 +394,11 @@ public class ServiceLayer {
         prvm.setTotalPrice(invoiceTotalPrice);
 
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
-
-        clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
-        if (clientLevelUpList.get(0).getPoints() == -1) {
+        int clientLevelUp = getLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
+        if (clientLevelUp == -1) {
             prvm.setTotalLvlUpPts("not available");
         } else {
-            Integer totalPts = 0;
-            for (LevelUp lu : clientLevelUpList) {
-                totalPts += lu.getPoints();
-            }
+            Integer totalPts = levelUp + clientLevelUp;
 
             prvm.setTotalLvlUpPts(totalPts.toString());
 

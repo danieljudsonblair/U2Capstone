@@ -149,7 +149,7 @@ public class ServiceLayerTests {
         doReturn(levelUp).when(levelUpClient).createLevelUp(levelUp1);
         doReturn(levelUp).when(levelUpClient).getLevelUp(1);
         doReturn(lUpList).when(levelUpClient).getAllLevelUps();
-        doReturn(lUpList).when(levelUpClient).getLevelUpByCustomerId(1);
+        doReturn(lUpList).when(levelUpClient).getLevelUpsByCustomerId(1);
     }
 
     public void setUpProductClientMock() {
@@ -259,8 +259,7 @@ public class ServiceLayerTests {
         assertEquals(levelUp1, service.saveLevelUp(levelUp));
         assertEquals(levelUp1, service.fetchLevelUp(levelUp1.getLevelUpId()));
         assertEquals(service.fetchAllLevelUps().size(), 1);
-        assertEquals(service.fetchLevelUpByCustomerId(1).size(), 1);
-        assertEquals(service.fetchLevelUpByCustomerId(1).get(0), levelUp1);
+        assertEquals(service.getLevelUpByCustomerId(1),10);
     }
 
     @Test
