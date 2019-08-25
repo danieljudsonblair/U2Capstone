@@ -9,7 +9,7 @@ servers:
     description: Local dev server
     
 paths:
-  /purchase:
+  /invoices:
     post:
       summary: Create a new purchase
       description: Creates new purchase object with existing customer Id or new Customer object
@@ -39,18 +39,81 @@ paths:
               schema:
                 type: string
                 
-  /products:            
     get:
-      summary: Get all products
-      description: Get list of all products in DB
+      summary: Get all invoices
+      description: Get list of all invoices in DB
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponseList'
-      
+                $ref: '#/components/schemas/InvoiceResponseList'
+                
+  /invoices/{id}:
+    get:
+      summary: Get invoice by id
+      description: Queries for invoice by id
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Invoice id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /invoices/customer/{customer_id}:
+    get:
+      summary: Get invoices by customer id
+      description: Queries for invoices by customer id
+      parameters: 
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+
   /products/{id}:
     get:
       summary: Get product by id
@@ -94,27 +157,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductResponseList'
                 
-  /inventory:              
+  /products/invoice/{invoice_id}:
     get:
-      summary: Get all inventory objects
-      description: Get list of all inventory objects in DB
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InventoryResponseList'
-                
-  /inventory/{inventory_id}:
-    get:
-      summary: Get inventory object by id
-      description: Queries for inventory object by id
+      summary: Get list of products by invoice id
+      description: Get list of products on an invoice by invoice id
       parameters: 
-        - name: inventory_id
+        - name: invoice_id
           in: path
           required: true
-          description: Inventory id
+          description: Invoice id
           schema:
             type: string
       responses:
@@ -123,24 +174,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InventoryResponse'
-        '422':
-          description: Unprocessable Entity
+                $ref: '#/components/schemas/ProductResponseList'
+  
+  /levelup/customer/{customer_id}:
+    get:
+      summary: Get levelup points by customer id
+      description: get customer total levelup points by customer id in path
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                type: string
+                type: number
         '404':
           description: Not found
           content:
             application/json:
               schema:
                 type: string
-                
 
-
-
-  
 components:
   schemas:
 
@@ -171,8 +231,8 @@ components:
               type: number
             customerId:
               type: number
-        purchaseDate:
-          type: string
+            purchaseDate:
+              type: string
         customer:
           $ref: '#/components/schemas/CustomerResponse'
         productList:
@@ -180,6 +240,8 @@ components:
           items:
             $ref: '#/components/schemas/ProductView'
         lvlUpPtsThisPurchase:
+          type: number
+        totalLvlUpPts:
           type: number
         totalPrice:
           type: number
@@ -273,37 +335,6 @@ components:
       items:
         $ref: '#/components/schemas/ProductResponse'
 
-    InventoryResponse:
-      type: object
-      properties:
-        inventory_id:
-          type: number
-        product_id:
-          type: number
-        quantity:
-          type: number
-          
-    InventoryResponseList:
-      type: array
-      items:
-        $ref: '#/components/schemas/InventoryResponse'
-        
-    InvoicePost:
-      type: object
-      properties:
-        purchase_date:
-          type: string
-        customer_id:
-          type: number
-        product_list:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvoicePostItem'
-      required:
-      - purchase_date
-      - customer_id
-      - product_list
-      
     InvoicePostItem:
       type: object
       properties:
@@ -318,27 +349,13 @@ components:
     InvoiceResponse:
       type: object
       properties:
-        invoice_id:
+        invoiceId:
           type: number
-        purchase_date:
-          type: string
-        customer_id:
+        customerId:
           type: number
-        first_name:
+        purchaseDate:
           type: string
-        last_name:
-          type: string
-        street:
-          type: string
-        city:
-          type: string
-        zip:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-        product_list:
+        invoiceItemList:
           type: array
           items:
             $ref: '#/components/schemas/InvoicePostItem'
