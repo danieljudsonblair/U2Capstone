@@ -9,103 +9,48 @@ servers:
     description: Local dev server
     
 paths:
-  /invoices:
+  /purchase:
     post:
-      summary: Create a new invoice object
-      description: Adds a new invoice object to DB
+      summary: Create a new purchase
+      description: Creates new purchase object with existing customer Id or new Customer object
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InvoicePost'
+              $ref: '#/components/schemas/PurchasePost'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvoiceResponse'
+                $ref: '#/components/schemas/PurchaseResponse'
         '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
+  /products:            
+    get:
+      summary: Get all products
+      description: Get list of all products in DB
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponseList'
       
-    get:
-      summary: Get all invoices
-      description: Get list of all invoices in DB
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvoiceResponseList'
-                
-  /invoices/{invoice_id}:
-    get:
-      summary: Get invoice object by id
-      description: Queries for invoice object by id
-      parameters: 
-        - name: invoice_id
-          in: path
-          required: true
-          description: Invoice id
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvoiceResponse'
-        '422':
-          description: Unprocessable Entity
-          content:
-            application/json:
-              schema:
-                type: string
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                type: string
-                
-  /invoices/customer/{customer_id}:
-    get:
-      summary: Get list of invoice objects by customer id
-      description: Queries for invoice objects by customer id
-      parameters: 
-        - name: customer_id
-          in: path
-          required: true
-          description: Customer id
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvoiceResponseList'
-        '422':
-          description: Unprocessable Entity
-          content:
-            application/json:
-              schema:
-                type: string
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                type: string
-        
   /products/{id}:
     get:
       summary: Get product by id
@@ -148,25 +93,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductResponseList'
-
-  /products/invoice/{invoice_id}:
+                
+  /inventory:              
     get:
-      summary: Get list of products by invoice id
-      description: Queries for products by invoice id
-      parameters: 
-        - name: invoice_id
-          in: path
-          required: true
-          description: Invoice id
-          schema:
-            type: number
+      summary: Get all inventory objects
+      description: Get list of all inventory objects in DB
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponseList'
+                $ref: '#/components/schemas/InventoryResponseList'
+                
+  /inventory/{inventory_id}:
+    get:
+      summary: Get inventory object by id
+      description: Queries for inventory object by id
+      parameters: 
+        - name: inventory_id
+          in: path
+          required: true
+          description: Inventory id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
         '422':
           description: Unprocessable Entity
           content:
@@ -180,40 +137,109 @@ paths:
               schema:
                 type: string
                 
-  /levelup/customer/{customer_id}:
-    get:
-      summary: Get levelup points by customer
-      description: Queries DB for levelup points by customer id
-      parameters:
-      - name: customer_id
-        in: path
-        required: true
-        description: Customer id
-        schema:
-          type: number
-      responses: 
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: number
-        '422':
-          description: Unprocessable Entity
-          content:
-            application/json:
-              schema:
-                type: string
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                type: string
+
+
+
   
 components:
   schemas:
 
+    PurchasePost:
+      type: object
+      properties:
+        customerId:
+          type: number
+        customer:
+          $ref: '#/components/schemas/CustomerPost'
+        purchaseDate:
+          type: string  
+        inventoryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseItem'
+      required:
+      - purchaseDate
+      - inventoryList
+      
+    PurchaseResponse:
+      type: object
+      properties:
+        Invoice:
+          type: object
+          properties:
+            invoiceId:
+              type: number
+            customerId:
+              type: number
+        purchaseDate:
+          type: string
+        customer:
+          $ref: '#/components/schemas/CustomerResponse'
+        productList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductView'
+        lvlUpPtsThisPurchase:
+          type: number
+        totalPrice:
+          type: number
+          
+    CustomerResponse:
+      type: object
+      properties:
+        customer_id:
+          type: number
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          
+    PurchaseItem:
+      properties:
+        inventoryId:
+          type: number
+        quantity:
+          type: number
+      required:
+      - inventoryId
+      - quantity
+          
+    CustomerPost:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+      required: 
+      - first_name
+      - last_name
+      - street
+      - city
+      - zip
+      - email
+      - phone
+          
     ProductResponse:
       type: object
       properties:
@@ -228,11 +254,40 @@ components:
         unit_cost:
           type: number
           
+    ProductView:
+      type: object
+      properties:
+        productName:
+          type: string
+        productDescription:
+          type: string
+        quantity:
+          type: number
+        listPrice:
+          type: number
+        productTotal:
+          type: number
+          
     ProductResponseList:
       type: array
       items:
         $ref: '#/components/schemas/ProductResponse'
 
+    InventoryResponse:
+      type: object
+      properties:
+        inventory_id:
+          type: number
+        product_id:
+          type: number
+        quantity:
+          type: number
+          
+    InventoryResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/InventoryResponse'
+        
     InvoicePost:
       type: object
       properties:
@@ -292,3 +347,5 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/InvoiceResponse'
+        
+        
