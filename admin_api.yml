@@ -609,6 +609,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/InvoiceResponseList'
                 
+  /invoices/customer/{customer_id}:
+    get:
+      summary: Get all invoices for a customer
+      description: Get a list of invoices by customer id in path
+      parameters:
+      - name: customer_id
+        in: path
+        required: true
+        description: Customer id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponseList'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: string
+                
   /invoices/{invoice_id}:
     get:
       summary: Get invoice object by id
@@ -727,14 +752,16 @@ components:
               type: number
             customerId:
               type: number
-        purchaseDate:
-          type: string
+            purchaseDate:
+              type: string
         customer:
           $ref: '#/components/schemas/CustomerResponse'
         productList:
           type: array
           items:
             $ref: '#/components/schemas/ProductView'
+        totalLvlUpPts:
+          type: string
         lvlUpPtsThisPurchase:
           type: number
         totalPrice:

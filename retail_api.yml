@@ -242,7 +242,7 @@ components:
         lvlUpPtsThisPurchase:
           type: number
         totalLvlUpPts:
-          type: number
+          type: string
         totalPrice:
           type: number
           
