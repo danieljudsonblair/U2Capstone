@@ -321,15 +321,17 @@ public class ServiceLayer {
 
     private PurchaseReturnViewModel buildPurchaseReturnViewModel(PurchaseSendViewModel psvm) {
         PurchaseReturnViewModel prvm = new PurchaseReturnViewModel();
-        List<ProductView> pvList = new ArrayList<>();
         List<InvoiceItem> iiList = new ArrayList<>();
-        List<InventoryView> ivList;
-        BigDecimal invoiceTotalPrice = new BigDecimal("0");
-        Inventory clientInventory;
-        Product clientProduct;
-        Inventory updatedInventory = new Inventory();
 
+        customerHelper(psvm, prvm);
+        productViewAndInvoiceItemHelper(psvm, prvm, iiList);
+        levelUpHelper(prvm, psvm);
+        invoiceHelper(psvm, prvm, iiList);
 
+        return prvm;
+    }
+
+    private void customerHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm) {
         if (psvm.getCustomer() == null) {
             Customer customer = customerClient.fetchCustomer(psvm.getCustomerId());
             if (customer == null)
@@ -338,8 +340,16 @@ public class ServiceLayer {
         } else if (psvm.getCustomer() != null && psvm.getCustomerId() == 0) {
             prvm.setCustomer(customerClient.createCustomer(psvm.getCustomer()));
         }
+    }
 
+    private void productViewAndInvoiceItemHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm, List<InvoiceItem> iiList) {
+        List<InventoryView> ivList;
         ivList = psvm.getInventoryList();
+        Inventory clientInventory;
+        Product clientProduct;
+        Inventory updatedInventory = new Inventory();
+        List<ProductView> pvList = new ArrayList<>();
+
         for (InventoryView i : ivList) {
             InvoiceItem ii = new InvoiceItem();
             ProductView pv = new ProductView();
@@ -370,15 +380,20 @@ public class ServiceLayer {
 
             pvList.add(pv);
         }
-        prvm.setProductList(pvList);
 
-        for (ProductView p : pvList) {
+        prvm.setProductList(pvList);
+    }
+
+    private void levelUpHelper(PurchaseReturnViewModel prvm, PurchaseSendViewModel psvm) {
+        List<LevelUp> clientLevelUpList = new ArrayList<>();
+        BigDecimal invoiceTotalPrice = new BigDecimal("0");
+        LevelUp newLevelUp = new LevelUp();
+
+        for (ProductView p : prvm.getProductList()) {
             invoiceTotalPrice = invoiceTotalPrice.add(p.getProductTotal());
         }
         prvm.setTotalPrice(invoiceTotalPrice);
-        List<LevelUp> clientLevelUpList = new ArrayList<>();
-        LevelUp newLevelUp = new LevelUp();
-        boolean newCustomer = false;
+
         int levelUp = invoiceTotalPrice.divide(new BigDecimal("50")).setScale(1, BigDecimal.ROUND_FLOOR).intValue() * 10;
 
         clientLevelUpList = fetchLevelUpByCustomerId(prvm.getCustomer().getCustomerId());
@@ -399,7 +414,9 @@ public class ServiceLayer {
         }
 
         prvm.setLvlUpPtsThisPurchase(levelUp);
+    }
 
+    private void invoiceHelper(PurchaseSendViewModel psvm, PurchaseReturnViewModel prvm, List<InvoiceItem> iiList) {
         InvoiceView iv = new InvoiceView();
         Invoice invoice = new Invoice();
 
@@ -413,7 +430,5 @@ public class ServiceLayer {
         invoice.setInvoiceId(iv.getInvoiceId());
 
         prvm.setInvoice(invoice);
-
-        return prvm;
     }
 }
