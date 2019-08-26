@@ -2,7 +2,6 @@ package com.company.retailapiservice.model;
 
 import com.company.retailapiservice.viewModel.InventoryView;
 
-import javax.validation.constraints.Min;
 import java.util.Objects;
 
 public class Inventory extends InventoryView {

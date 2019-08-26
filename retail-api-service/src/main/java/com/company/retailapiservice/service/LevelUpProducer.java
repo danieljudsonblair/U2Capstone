@@ -32,14 +32,4 @@ public class LevelUpProducer {
 
         return SAVE_QUEUED_MSG;
     }
-
-    @PutMapping("/levelups")
-    public String updateLevelUp(@RequestBody LevelUp levelup) {
-        LevelUp msg = new LevelUp(levelup.getLevelUpId(), levelup.getCustomerId(), levelup.getPoints(), levelup.getMemberDate());
-        System.out.println("Sending levelup...");
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, msg);
-        System.out.println("LevelUp update sent");
-
-        return UPDATE_QUEUED_MSG;
-    }
 }

@@ -1,15 +1,11 @@
 package com.company.retailapiservice.controller;
 
-
-import com.company.retailapiservice.model.Inventory;
 import com.company.retailapiservice.model.InvoiceView;
 import com.company.retailapiservice.model.Product;
 import com.company.retailapiservice.service.ServiceLayer;
-import com.company.retailapiservice.viewModel.ProductView;
 import com.company.retailapiservice.viewModel.PurchaseReturnViewModel;
 import com.company.retailapiservice.viewModel.PurchaseSendViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +15,11 @@ import java.util.List;
 
 @RestController
 @RefreshScope
-@CacheConfig(cacheNames = {"invoices"})
-
 public class RetailController {
     @Autowired
     ServiceLayer service;
 
-//    @CachePut(key = "#results.getInvoice().getInvoiceId()")
+
     @PostMapping(value = "/invoices")
     @ResponseStatus(HttpStatus.CREATED)
     public PurchaseReturnViewModel createPurchase(@RequestBody @Valid PurchaseSendViewModel psvm) {

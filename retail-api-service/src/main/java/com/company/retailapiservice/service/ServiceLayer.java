@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ServiceLayer {
@@ -40,16 +40,16 @@ public class ServiceLayer {
         return buildPurchaseReturnViewModel(psvm);
     }
 
-    public Product getProductByProductId(int productId){
+    public Product getProductByProductId(int productId) {
         return productClient.getProductById(productId);
     }
 
-    public List<Product> getProductsInInventory(){
-        List<Product> inventoryProducts = new ArrayList<>();
-        inventoryClient.getAllInventorys().stream().forEach(i -> {
-            if (i.getQuantity() > 0)
-                inventoryProducts.add(productClient.getProductById(i.getProductId()));
-        });
+    public List<Product> getProductsInInventory() {
+        List<Product> inventoryProducts = inventoryClient.getAllInventorys().stream()
+                .filter(i -> i.getQuantity() > 0)
+                .map(i -> productClient.getProductById(i.getProductId()))
+                .collect(Collectors.toList());
+
         return inventoryProducts;
     }
 
@@ -57,6 +57,7 @@ public class ServiceLayer {
         InvoiceView invoice = invoiceClient.fetchInvoiceById(id);
         if (invoice == null)
             throw new NotFoundException(notFound("invoice", id));
+
         return invoice;
     }
 
@@ -65,29 +66,27 @@ public class ServiceLayer {
     }
 
     public List<InvoiceView> getInvoicesByCustomerId(int id) {
-        List<InvoiceView> ciList = new ArrayList<>();
         List<InvoiceView> iList = invoiceClient.fetchAllInvoices();
-        for (InvoiceView iv : iList) {
-            if (iv.getCustomerId() == id) {
-                ciList.add(iv);
-            }
-        }
+        List<InvoiceView> ciList = iList.stream().filter(iv -> iv.getCustomerId() == id).collect(Collectors.toList());
+
         if (ciList.size() == 0)
             throw new NotFoundException("No invoices could be found for customer id " + id);
+
         return ciList;
     }
 
     public List<Product> getProductsByInvoiceId(int id) {
         InvoiceView invoice = invoiceClient.fetchInvoiceById(id);
-        List<Product> pList = new ArrayList<>();
         if (invoice == null)
             throw new NotFoundException(notFound("invoice", id));
-        invoice.getInvoiceItemList().stream().forEach(invoiceItem ->
-            pList.add(productClient.getProductById(
-                        inventoryClient.getInventoryById(invoiceItem.getInventoryId()).getProductId())));
+        List<Product> pList = invoice.getInvoiceItemList().stream()
+                .map(invoiceItem -> productClient.getProductById(
+                        inventoryClient.getInventoryById(invoiceItem.getInventoryId()).getProductId()))
+                .collect(Collectors.toList());
 
         return pList;
     }
+
     /*
         circuit breaker works OK when method is called from controller layer,
         but not when called from levelUpHelper method below
@@ -96,12 +95,8 @@ public class ServiceLayer {
     @HystrixCommand(fallbackMethod = "otherfallback")
     public int getLevelUpByCustomerId(int customer_id) {
         try {
-            int total = 0;
-            List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
-            for (LevelUp lu : levelUpList) {
-                total += lu.getPoints();
-            }
-            return total;
+            return levelUpClient.getLevelUpsByCustomerId(customer_id)
+                    .stream().mapToInt(LevelUp::getPoints).sum();
         } catch (Exception e) {
             return -1;
         }
@@ -181,7 +176,6 @@ public class ServiceLayer {
     }
 
     private void levelUpHelper(PurchaseReturnViewModel prvm, PurchaseSendViewModel psvm) {
-        List<LevelUp> clientLevelUpList = new ArrayList<>();
         BigDecimal invoiceTotalPrice = new BigDecimal("0");
         LevelUp newLevelUp = new LevelUp();
 

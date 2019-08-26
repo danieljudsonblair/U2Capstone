@@ -66,7 +66,6 @@ public class ServiceLayerTest {
 
         doReturn(customer).when(customerClient).createCustomer(customer1);
         doReturn(customer).when(customerClient).getCustomer(1);
-        doReturn(cList).when(customerClient).getAllCustomers();
     }
 
     public void setUpInvoiceServiceClientMock() {

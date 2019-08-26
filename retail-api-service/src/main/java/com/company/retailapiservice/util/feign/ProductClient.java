@@ -9,18 +9,10 @@ import java.util.List;
 
 @FeignClient(name = "product-service")
 public interface ProductClient {
-    @PostMapping(value = "/products")
-    public Product submitProduct(@RequestBody @Valid Product product);
 
     @GetMapping(value = "/products/{id}")
     public Product getProductById(@PathVariable int id);
 
     @GetMapping(value = "/products")
     public List<Product> getAllProducts();
-
-    @PutMapping(value = "/products")
-    public void updateProduct(@RequestBody Product product);
-
-    @DeleteMapping(value = "/products/{id}")
-    public void deleteProduct(@PathVariable int id);
 }

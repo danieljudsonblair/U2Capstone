@@ -16,11 +16,4 @@ public interface InvoiceClient {
 
     @GetMapping(value = "/invoices/{invoiceId}")
     public InvoiceView fetchInvoiceById(@PathVariable int invoiceId);
-
-    @PutMapping(value = "/invoices")
-    public void updateInvoice(@RequestBody InvoiceView ivm);
-
-    @DeleteMapping(value = "/invoices/{id}")
-    public void deleteInvoice(@PathVariable int id);
-
 }

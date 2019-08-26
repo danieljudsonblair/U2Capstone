@@ -17,16 +17,10 @@ import java.util.List;
 @FeignClient(name = "level-up-service")
 public interface LevelUpClient {
 
-    @GetMapping("/levelups/{id}")
-    public LevelUp getLevelUpById(@PathVariable int id);
-
     @GetMapping("/levelups")
     public List<LevelUp> getAllLevelUps();
 
 
     @GetMapping("/levelups/customer/{id}")
     public List<LevelUp> getLevelUpsByCustomerId(@PathVariable int id);
-
-    @DeleteMapping("/levelups/{id}")
-    public void deleteLevelUp(@PathVariable int id);
 }

@@ -15,13 +15,4 @@ public interface CustomerClient {
 
     @GetMapping("/customers/{customerId}")
     public Customer getCustomer(@PathVariable int customerId);
-
-    @GetMapping("/customers")
-    public List<Customer> getAllCustomers();
-
-    @PutMapping("/customers")
-    public void updateCustomer(@RequestBody Customer customer);
-
-    @DeleteMapping("/customers/{customerId}")
-    public void deleteCustomer(@PathVariable int customerId);
 }
