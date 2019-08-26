@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 @Component
 @EnableCircuitBreaker
@@ -93,13 +92,11 @@ public class ServiceLayer {
         return productClient.getProduct(product_id);
     }
 
-
-    // this circuit breaker method works ok
     @HystrixCommand(fallbackMethod = "fallbackLevelUp")
     public LevelUp fetchLevelUp(int levelUp_id) {
         return levelUpClient.getLevelUp(levelUp_id);
     }
-    // when levelup service is down, fallbackLevelUp method below is called
+
     public LevelUp fallbackLevelUp(int levelUp_id) {
         LevelUp levelUp = new LevelUp();
         levelUp.setLevelUpId(levelUp_id);
@@ -109,29 +106,15 @@ public class ServiceLayer {
         return levelUp;
     }
 
-    /*
-        circuit breaker works OK when method is called from controller layer,
-        but not when called from levelUpHelper method below
-        I only added try-catch block after exhausting attempts to fix circuit breaker
-    */
     @HystrixCommand(fallbackMethod = "otherfallback")
     public int getLevelUpByCustomerId(int customer_id) {
         try {
-            int total = 0;
-            List<LevelUp> levelUpList = levelUpClient.getLevelUpsByCustomerId(customer_id);
-            for (LevelUp lu : levelUpList) {
-                total += lu.getPoints();
-            }
-            return total;
+            return levelUpClient.getLevelUpsByCustomerId(customer_id).stream().mapToInt(LevelUp::getPoints).sum();
         } catch (Exception e) {
             return -1;
         }
     }
 
-    /*
-        when levelup service is down, and getLevelUpByCustomerId is called from levelUpHelper method,
-        this method IS NOT CALLED and a timeout exception is thrown.  I have no idea why
-    */
     public int otherfallback(int customer_id) {
         return -1;
     }
@@ -384,7 +367,6 @@ public class ServiceLayer {
     }
 
     private void levelUpHelper(PurchaseReturnViewModel prvm, PurchaseSendViewModel psvm) {
-        List<LevelUp> clientLevelUpList = new ArrayList<>();
         BigDecimal invoiceTotalPrice = new BigDecimal("0");
         LevelUp newLevelUp = new LevelUp();
 

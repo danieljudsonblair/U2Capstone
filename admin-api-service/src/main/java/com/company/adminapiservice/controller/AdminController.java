@@ -28,7 +28,7 @@ public class AdminController {
 
     @PostMapping("/invoices")
     @ResponseStatus(HttpStatus.CREATED)
-    public InvoiceView saveInvoice(InvoiceView iv, Principal principal) {
+    public InvoiceView saveInvoice(@RequestBody @Valid InvoiceView iv, Principal principal) {
         return service.saveInvoice(iv);
     }
 
